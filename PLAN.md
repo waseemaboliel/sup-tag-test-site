@@ -19,9 +19,15 @@ Hotjar is explicitly out of scope for this site.
 - A `checkout.html` page with a "Place order" button that fires:
   - `window._uxa.push(['trackTransaction', { value: 1000, currency: 'EUR', id: 'test-order-1' }])` (with ID)
   - and a variant without an `id` (anonymous transaction)
-- Buttons for the ecommerce dataLayer events the copied `Ecomm Tag` in GTM expects (`ec:transaction:send`, `ec:transaction:items:add` or the newer `ecommerce:send` / `ecommerce:addItem`) — check which schema the "Contentsquare - E-commerce data" tag template actually expects before wiring the button.
+- The documented ecommerce command pair for the copied `Ecomm Tag`:
+  ```js
+  window._uxa.push(['ec:transaction:create', { id: 'test-txn-1', revenue: 49.99, currency: 'USD' }]);
+  window._uxa.push(['ec:transaction:send']);
+  ```
+- A **second, alternate checkout path** (e.g. "guest checkout" or "3rd-party redirect checkout") that lands on the confirmation page *without* firing the commands above — reproduces the recurring "some checkout paths don't fire the transaction" pattern (TAGS-11390 Telstra; Shopify Shop Pay/3rd-party-redirect gap, TAGS-11413).
+- A "replay order" button that fires the same transaction ID twice (and one with a missing currency) — reproduces inflated/duplicate-revenue tickets (SUP-23605, SUP-23573).
 
-**Why:** transaction/funnel mismatches and GA4 export discrepancies are a recurring Support ticket pattern.
+**Why:** transaction/funnel mismatches, missed checkout paths, and duplicate/inflated revenue are a recurring Support ticket pattern.
 
 **Status:** not started.
 
@@ -58,11 +64,96 @@ Hotjar is explicitly out of scope for this site.
 **Goal:** cover the trickier install/runtime scenarios that generate the hardest Support tickets.
 
 **Add:**
-- An `spa.html` page that fakes single-page navigation with `history.pushState` (no full reload), to confirm the GTM "History Change" trigger fires a fresh Contentsquare pageview — this is the same mechanism behind "SPA / Artificial Pageview" tickets.
-- An `iframe.html` page that embeds one of our own pages inside an `<iframe>`, to test whether/how tracking behaves for iframe-embedded content (relevant to the recurring "video/integration tracking inside a vendor iframe" limitation).
-- A `video.html` page with a real YouTube `<iframe>` embed, to test the YouTube integration dvar timing (there's a known first-view race condition — see SUP-23601 for context).
+- An `spa.html` page with **two variants** of fake single-page navigation: one using `history.pushState` (URL changes) and one that only swaps DOM content (no URL change) — each followed by the documented artificial-pageview snippet. Confirms the GTM "History Change" trigger only catches the first case (SUP-23318: unexpected artificial pageviews).
+- An `iframe.html` page that embeds one of our own pages inside an `<iframe>`, including a `sandbox="allow-scripts"` variant, to test whether/how tracking behaves for iframe-embedded content and reproduce the sandboxed-iframe tag-injection failure mode (2026-02-17 incident: tracking-tag doesn't start in a sandboxed iframe). Also demonstrates the "tag must be present in both parent and child frame" requirement (SUP-22611, SUP-23401).
+- A `video.html` page with both a YouTube `<iframe>` embed (to test the first-view dvar race, SUP-23601) and a Brightcove-style iframe embed (to demonstrate the *structural* limitation — dvars never fire because the player lives in a vendor iframe we don't control, SUP-23600) side by side, so Support can see the difference between "race condition, fixable" and "structural limitation, not fixable."
 - A `direct-install.html` page that loads the Contentsquare tag directly via the manual `_uxa` bootstrap snippet (**not** through GTM) pointed at the same tag ID, so we can compare the official-template install path against the legacy Custom-HTML install path side by side — this is exactly the A1 vs A1b comparison documented internally for the CSP `unsafe-inline` investigation.
+- A generic dvar sanity-check strip (buttons firing `trackDynamicVariable` with varied key/value shapes — string, int, high-cardinality) Support can compare against a broken customer case when an integration's dvar simply never arrives (recurring across SUP-23625 Adobe Target, SUP-20593 Coveo/Qubit, SUP-20076 Monetate).
 
 **Why:** these are the scenarios that don't reproduce on a simple site and usually require guesswork on real tickets.
+
+**Status:** not started.
+
+## Phase 5 — Funnels & Goals
+
+**Goal:** reproduce path/exact-path funnel and goal-matching mistakes that cause false alerts or miscounted conversions.
+
+**Add:**
+- A `thankyou.html` page reachable from two or more different fake flows (e.g. `/checkout` and `/subscribe`) using the *same* URL/query pattern, plus a query-param toggle to vary the path slightly — reproduces exact-path funnel over-capture, the exact root cause behind the Bombas false "mobile conversion collapse" alert (SUP-23202: a thank-you-page mapping wrongly captured ~8% of orders from an unrelated flow).
+- Two pages whose URLs both match a deliberately sloppy pattern (e.g. `/product-1234/` and `/product-1234-review/`) to test page-group/goal regex overlap (double-counted or skipped funnel steps).
+
+**Why:** funnel/goal misconfiguration is a recurring source of false "something broke" alerts that waste investigation time before the real (non-)issue is found.
+
+**Status:** not started.
+
+## Phase 6 — GA4 & Integration DVar Sanity
+
+**Goal:** make GA4 matching-key and export-timing issues visible and comparable.
+
+**Add:**
+- A page that logs/exposes the Contentsquare matching key (`csMatchingKey`) alongside a mock GA client-id cookie, so Support can visually confirm presence/absence of the matching key — the root cause behind GA4 segments showing 0% (SUP-22768, SUP-837500).
+- A button that fires several rapid `trackPageview` calls (SPA-style, via pushState) to test whether GA4 export dedupes/matches 1:1 against Contentsquare's own pageview count (SUP-23573: GA4 page-event discrepancy).
+
+**Why:** GA4 matching-key and export-count mismatches are a recurring, hard-to-explain integration ticket pattern.
+
+**Status:** not started.
+
+## Phase 7 — PII & Masking
+
+**Goal:** verify PII masking behaves correctly (and predictably) across error tracking and Session Replay.
+
+**Add:**
+- Extend `errors.html` (Phase 2) with a custom-error button carrying an obviously PII-shaped payload (fake email/card number) and an API-error button whose URL itself carries PII in the query string (e.g. `httpstat.us/404?email=test@test.com`) — API Error collection is disabled by default specifically because request URLs often carry PII.
+- A form page with password, credit-card, and email fields — some tagged with the typical masking-rule selector/class, some deliberately not — to verify masking triggers correctly on flagged fields and doesn't accidentally mask unflagged ones. Mirrors recurring "masking rule not applying to a specific element" tickets (SUP-21751).
+
+**Why:** PII leakage (or over-masking) is one of the highest-severity classes of ticket we handle.
+
+**Status:** not started.
+
+## Phase 8 — Zoning & Snapshot Edge Cases
+
+**Goal:** reproduce the recurring ways Zoning/Heatmap snapshots and click attribution go wrong.
+
+**Add:**
+- A full-screen transparent `<div>` (high z-index, `background: transparent`) sitting over real buttons/links, plus a variant that also blocks `overflow: scroll` — reproduces zoning tap mis-attribution and blocked scroll (the HSBC cases, SUP-23358/23359, and existing [[cs4apps-transparent-overlays]] toolkit).
+- A custom element using `attachShadow` with clickable buttons inside its shadow root — reproduces clicks getting mis-attributed to the shadow host element instead of the actual clicked child.
+- A page with a lazy-loaded background-image section, an `<img loading="lazy">`, and a fixed/sticky top nav — common triggers for zoning snapshots coming back with missing sections/images despite the live page rendering fine (recurring pattern across SUP-23166, SUP-22371, SUP-22927, SUP-22825, SUP-23012, SUP-23498).
+- A stylesheet whose filename changes on every load (e.g. via a query param swap) to approximate hashed-chunk-rotation-before-scrape, the confirmed root cause of replays rendering without CSS (SUP-23308, precedent for [[sup-23308-srm-missing-css]]).
+
+**Why:** these are exactly the "clean HAR/console but broken snapshot" tickets that are hardest to diagnose without a reproducible case.
+
+**Status:** not started.
+
+## Phase 9 — Consent & Opt-Out
+
+**Goal:** make opt-in/opt-out behavior directly verifiable instead of just documented.
+
+**Add:**
+- Buttons calling `window._uxa.push(['optout'])` and `['optin']`, with an on-page instruction to reload and check the Network tab to confirm `c.contentsquare.net` calls actually stop after opt-out and resume after opt-in.
+
+**Why:** "opt-out isn't stopping collection" is a recurring customer question, and having a page that proves the mechanism works removes doubt fast.
+
+**Status:** not started.
+
+## Phase 10 — Heap ↔ Contentsquare Identity & Session Mapping
+
+**Goal:** make the cross-tool identity relationship visible instead of theoretical.
+
+**Add:**
+- A page exposing both `window._uxa` calls and `heap.identify()` / `heap.track()` side by side, with an on-page readout of both tools' current session/user IDs (read from their respective cookies), so Support can visually confirm which ID maps to which — directly addresses the recurring confusion in the Heap Tag Status / Crosswriting docs over which tool "drives" session/pageview.
+- *(Advanced, may need a second real subdomain/custom domain — GitHub Pages project sites can't fake this convincingly with paths alone, so scope this down or skip if not worth the setup):* a cross-subdomain/cross-origin session-continuity check comparing the session cookie before/after navigating, to demonstrate when a session breaks vs. persists across domains.
+
+**Why:** ID-mapping confusion between Heap and Contentsquare is a recurring root cause once dual-collection or crosswriting is involved.
+
+**Status:** not started.
+
+## Phase 11 — Input & IME Edge Cases
+
+**Goal:** reproduce the recurring Japanese-IME input bug in search-style inputs.
+
+**Add:**
+- A search-style text input that only listens for the `compositionend` event (not plain `input`), with on-page instructions to type Japanese/IME text — reproduces the confirmed recurring bug where zoning/share-modal search fields miss IME-composed input (SUP-22748 Shiseido Japan; see [[ime-japanese-input-bug]]).
+
+**Why:** confirmed recurring bug pattern across multiple customers/areas — having a live repro means we stop re-diagnosing it from scratch each time.
 
 **Status:** not started.
