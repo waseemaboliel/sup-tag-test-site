@@ -33,17 +33,29 @@ Hotjar is explicitly out of scope for this site.
 
 ## Phase 2 — Error Analysis Testing
 
-**Goal:** reproduce JS errors, failed API calls, and custom errors on demand, to test Error Analysis collection rules and PII masking.
+**Goal:** exercise all 4 error types the Error Analysis module actually captures (JS Errors, API Errors, Custom Errors, Console Messages) plus the URL-masking commands, so we have a live repro for the recurring "error not collected" / "PII in error data" ticket pattern.
+
+Confirmed from the internal "Tag error collection quick reference" doc — this isn't 2 separate features, it's 1 module with 4 sub-types:
+
+| Type | How it's captured | Endpoint | Notes |
+|---|---|---|---|
+| JS Errors | automatic, any uncaught exception | `/errors` | max 20/pageview, message capped at 1024 chars |
+| API Errors | automatic, any XHR/fetch failure | `/api-errors` | default rule: status ≥ 400, **all** URLs, no config needed |
+| Custom Errors | `window._uxa.push(['trackError', message, attributes])` | `/custom-errors` | auto-anonymizes emails/phones/names in the message |
+| Console Messages | plain `console.log/warn/error` calls | `/custom-errors` | only shows up if the project has `customErrors.consoleMessageLogLevels` configured — otherwise nothing is captured, which is itself worth demonstrating |
 
 **Add:**
-- An `errors.html` page with:
+- An `errors.html` page:
   - A button that throws a real uncaught JS error (e.g. calling an undefined function).
-  - Buttons that fire `fetch`/`XHR` calls to a status-code echo service (e.g. `https://httpstat.us/500`, `/404`) to generate real API errors.
-  - A button that sends a custom error via `window._uxa.push(['trackError', '<MESSAGE>', { key: value }])`, including one variant with an obviously fake PII-shaped value (e.g. a fake email/card number) to confirm masking behavior.
+  - A button that sends a custom error via `trackError` with a plain message, and one with an obviously PII-shaped message (fake email/card number) to confirm auto-anonymization.
+  - Buttons for `console.log`, `console.warn`, `console.error` at different levels, with a note that these only get captured if the project has console-message levels configured — good for confirming whether a customer's "missing console errors" ticket is a config gap vs. a bug.
+- An `api-errors.html` page:
+  - Buttons firing `fetch`/`XHR` calls to a status-code echo service (e.g. `https://httpstat.us/500`, `/404`) to generate real API errors under the default ≥400 rule.
+  - A button firing a request to a URL with PII in the query string (e.g. `httpstat.us/404?email=test@test.com`), plus buttons demonstrating the masking commands `window._uxa.push(['networkRequest:maskUrls', ...])` (partial match) and `['api-errors:maskUrl', ...])` (full match) so we can confirm masking actually strips the PII before it's collected — directly relevant to SUP-21751-style "masking rule not applying" tickets.
 
-**Why:** mirrors real Error Analysis tickets — confirms our default collection rules (which we know don't cover all 4xx by default) and PII scrubbing.
+**Why:** mirrors real Error Analysis tickets — confirms which error types are actually enabled/configured on a given project, the default ≥400 API error rule, and PII masking behavior, instead of guessing from docs alone.
 
-**Status:** not started.
+**Status:** done — `errors.html`, `api-errors.html`.
 
 ## Phase 3 — User Identity & Session
 
@@ -103,8 +115,8 @@ Hotjar is explicitly out of scope for this site.
 **Goal:** verify PII masking behaves correctly (and predictably) across error tracking and Session Replay.
 
 **Add:**
-- Extend `errors.html` (Phase 2) with a custom-error button carrying an obviously PII-shaped payload (fake email/card number) and an API-error button whose URL itself carries PII in the query string (e.g. `httpstat.us/404?email=test@test.com`) — API Error collection is disabled by default specifically because request URLs often carry PII.
-- A form page with password, credit-card, and email fields — some tagged with the typical masking-rule selector/class, some deliberately not — to verify masking triggers correctly on flagged fields and doesn't accidentally mask unflagged ones. Mirrors recurring "masking rule not applying to a specific element" tickets (SUP-21751).
+- *(Already covered by Phase 2's `errors.html`/`api-errors.html`: PII-shaped custom errors, PII-in-URL API errors, and the `networkRequest:maskUrls`/`api-errors:maskUrl` commands. This phase is about Session Replay/DOM masking specifically, which is a separate mechanism.)*
+- A form page with password, credit-card, and email fields — some tagged with the typical masking-rule selector/class, some deliberately not — to verify Session Replay masking triggers correctly on flagged fields and doesn't accidentally mask unflagged ones. Mirrors recurring "masking rule not applying to a specific element" tickets (SUP-21751).
 
 **Why:** PII leakage (or over-masking) is one of the highest-severity classes of ticket we handle.
 
