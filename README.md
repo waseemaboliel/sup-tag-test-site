@@ -1,19 +1,22 @@
 # Support Tag Test Site
 
-A minimal static site used by Support to test how Hotjar / Heap / Contentsquare tags behave, loaded through a dedicated GTM sandbox container.
+A minimal static site used by Support to test how Heap / Contentsquare tags behave, loaded through a dedicated GTM sandbox container. Hotjar is explicitly out of scope for this site.
 
 ## Setup
 
 - **GTM container:** `GTM-W925CGJH` (a fresh sandbox container, separate from any customer or shared container)
 - **Contentsquare tag:** official "Contentsquare - Main tag" template, project `3977`, tag ID `2c5142b15f133`
 - **Heap tag:** Custom HTML tag copied as a starting point; currently still using a borrowed Heap App ID (`209188840`) as a placeholder until Support has its own trial App ID — swap it out in GTM once we have one.
-- **Hotjar:** not wired up yet — deferred for now.
 
 ## Pages
 
 - `index.html` — home page, overview
 - `page-two.html` — second page, for testing pageview tracking across navigation
 - `events.html` — buttons to fire a Contentsquare dynamic variable, a manual Contentsquare pageview, a Heap custom event, and a raw GTM dataLayer push
+
+## Roadmap
+
+This is intentionally a small starting point. See [PLAN.md](PLAN.md) for the phased plan to grow it (ecommerce/transactions, error analysis, user identity/session, advanced tag & CSP edge cases) — tackled one phase at a time.
 
 ## Notes
 
