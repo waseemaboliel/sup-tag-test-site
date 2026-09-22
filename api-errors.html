@@ -39,13 +39,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>The 4th Error Analysis sub-type. Captured <strong>automatically</strong> on any failed XHR/fetch — the default rule is status &ge;400 on all URLs, no config needed. See <a href="errors.html">Errors</a> for JS/Custom/Console types, and <a href="https://github.com/waseemaboliel/sup-tag-test-site/blob/main/PLAN.md">PLAN.md Phase 2</a> for details.</p>
 
 <h2>Trigger real API errors</h2>
-<button onclick="fireRequest('https://httpstat.us/404', '404')">Fetch a 404 (httpstat.us)</button>
-<button onclick="fireRequest('https://httpstat.us/500', '500')">Fetch a 500 (httpstat.us)</button>
-<button onclick="fireRequest('https://httpstat.us/200', '200 (control - should NOT be captured)')">Fetch a 200 (control, should not error)</button>
+<p><em>Note: <code>httpstat.us</code> turned out to be unreliable (intermittent 503s / CORS failures) — using <a href="https://jsonplaceholder.typicode.com">jsonplaceholder.typicode.com</a> and <a href="https://reqres.in">reqres.in</a> instead, both verified stable.</em></p>
+<button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/999999', '404', 'GET')">Fetch a 404 (nonexistent post on jsonplaceholder)</button>
+<button onclick="fireRequest('https://reqres.in/api/login', '400', 'POST', '{}')">Fetch a 400 (reqres login, missing params)</button>
+<button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/1', '200 (control - should NOT be captured)', 'GET')">Fetch a 200 (control, should not error)</button>
 
 <h2>PII in the request URL</h2>
 <p>Request URLs often carry customer PII (email, order IDs) in the path/query — this is exactly why API Error collection needs masking rules before going deeper than status/endpoint/method.</p>
-<button onclick="fireRequest('https://httpstat.us/404?email=test@example.com&card=4111111111111111', '404 with PII in query string')">
+<button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/999999?email=test@example.com&card=4111111111111111', '404 with PII in query string', 'GET')">
   Fetch a 404 with PII in the query string
 </button>
 
@@ -62,9 +63,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
   }
 
-  function fireRequest(url, label) {
-    log('Firing fetch to ' + url + ' (' + label + ')...');
-    fetch(url).then(function (r) {
+  function fireRequest(url, label, method, body) {
+    log('Firing ' + (method || 'GET') + ' to ' + url + ' (' + label + ')...');
+    var opts = { method: method || 'GET' };
+    if (body) {
+      opts.headers = { 'Content-Type': 'application/json' };
+      opts.body = body;
+    }
+    fetch(url, opts).then(function (r) {
       log('Response for ' + label + ': HTTP ' + r.status);
     }).catch(function (e) {
       log('Fetch error for ' + label + ': ' + e.message);
@@ -73,13 +79,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   function maskPartial() {
     window._uxa = window._uxa || [];
-    window._uxa.push(['networkRequest:maskUrls', 'https://httpstat.us/:status_code']);
-    log('Pushed networkRequest:maskUrls for https://httpstat.us/:status_code (partial match)');
+    window._uxa.push(['networkRequest:maskUrls', 'https://jsonplaceholder.typicode.com/posts/:id']);
+    log('Pushed networkRequest:maskUrls for https://jsonplaceholder.typicode.com/posts/:id (partial match)');
   }
 
   function maskFull() {
     window._uxa = window._uxa || [];
-    window._uxa.push(['api-errors:maskUrl', 'https://httpstat.us/404?email=test@example.com&card=4111111111111111']);
+    window._uxa.push(['api-errors:maskUrl', 'https://jsonplaceholder.typicode.com/posts/999999?email=test@example.com&card=4111111111111111']);
     log('Pushed api-errors:maskUrl for the exact PII test URL (full match)');
   }
 </script>
