@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart - Support Tag Test Site</title>
+<style>
+  body { font-family: -apple-system, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.5; color: #222; }
+  nav a { margin-right: 16px; }
+  code { background: #f2f2f2; padding: 2px 6px; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+  input[type=number] { width: 50px; }
+  button { display: inline-block; margin: 10px 8px 10px 0; padding: 10px 16px; font-size: 14px; cursor: pointer; }
+  #log { background: #f2f2f2; border-radius: 6px; padding: 12px; margin-top: 20px; font-family: monospace; font-size: 13px; white-space: pre-wrap; min-height: 40px; }
+</style>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W925CGJH');</script>
+<!-- End Google Tag Manager -->
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W925CGJH"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="page-two.html">Page Two</a>
+  <a href="events.html">Fire Events</a>
+  <a href="cart.html">Cart</a>
+</nav>
+
+<h1>Cart</h1>
+<p>Dummy cart used to test Contentsquare ecommerce tracking. See <a href="https://github.com/waseemaboliel/sup-tag-test-site/blob/main/PLAN.md">PLAN.md Phase 1</a> for context.</p>
+
+<table>
+  <tr><th>Product</th><th>Price</th><th>Qty</th></tr>
+  <tr><td>Test Product A</td><td>$19.99</td><td><input type="number" id="qtyA" value="1" min="0" onchange="recalc()"></td></tr>
+  <tr><td>Test Product B</td><td>$9.99</td><td><input type="number" id="qtyB" value="2" min="0" onchange="recalc()"></td></tr>
+  <tr><td>Test Product C</td><td>$29.99</td><td><input type="number" id="qtyC" value="1" min="0" onchange="recalc()"></td></tr>
+</table>
+
+<p><strong>Cart total:</strong> $<span id="total">69.97</span> (<span id="itemCount">4</span> items)</p>
+
+<button onclick="pushCartDvars()">Push cart dvars (cartValue / cartItemsNb)</button><br>
+<a href="checkout.html"><button>Proceed to checkout</button></a>
+
+<div id="log">Update quantities or click a button to see what fired.</div>
+
+<script>
+  var prices = { A: 19.99, B: 9.99, C: 29.99 };
+
+  function log(msg) {
+    var el = document.getElementById('log');
+    el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
+  }
+
+  function recalc() {
+    var qtyA = Number(document.getElementById('qtyA').value) || 0;
+    var qtyB = Number(document.getElementById('qtyB').value) || 0;
+    var qtyC = Number(document.getElementById('qtyC').value) || 0;
+    var total = (qtyA * prices.A + qtyB * prices.B + qtyC * prices.C).toFixed(2);
+    var count = qtyA + qtyB + qtyC;
+    document.getElementById('total').textContent = total;
+    document.getElementById('itemCount').textContent = count;
+    return { total: total, count: count };
+  }
+
+  function pushCartDvars() {
+    var r = recalc();
+    window._uxa = window._uxa || [];
+    window._uxa.push(['trackDynamicVariable', { key: 'cartValue', value: Number(r.total) }]);
+    window._uxa.push(['trackDynamicVariable', { key: 'cartItemsNb', value: r.count }]);
+    log('Pushed dvars: cartValue=' + r.total + ', cartItemsNb=' + r.count);
+  }
+</script>
+
+</body>
+</html>

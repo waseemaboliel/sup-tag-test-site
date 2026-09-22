@@ -13,6 +13,9 @@ A minimal static site used by Support to test how Heap / Contentsquare tags beha
 - `index.html` — home page, overview
 - `page-two.html` — second page, for testing pageview tracking across navigation
 - `events.html` — buttons to fire a Contentsquare dynamic variable, a manual Contentsquare pageview, a Heap custom event, and a raw GTM dataLayer push
+- `cart.html` — dummy cart with quantity inputs, pushes `cartValue`/`cartItemsNb` dvars
+- `checkout.html` — fires `ec:transaction:create`/`ec:transaction:send` in normal, anonymous, duplicate-id, and missing-currency variants
+- `guest-checkout.html` — simulates a checkout path that never fires the transaction commands (Phase 1 of [PLAN.md](PLAN.md))
 
 ## Roadmap
 

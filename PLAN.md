@@ -29,7 +29,7 @@ Hotjar is explicitly out of scope for this site.
 
 **Why:** transaction/funnel mismatches, missed checkout paths, and duplicate/inflated revenue are a recurring Support ticket pattern.
 
-**Status:** not started.
+**Status:** done — `cart.html`, `checkout.html`, `guest-checkout.html`.
 
 ## Phase 2 — Error Analysis Testing
 

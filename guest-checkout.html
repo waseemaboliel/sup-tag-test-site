@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fire Events - Support Tag Test Site</title>
+<title>Guest Checkout - Support Tag Test Site</title>
 <style>
   body { font-family: -apple-system, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.5; color: #222; }
   nav a { margin-right: 16px; }
@@ -31,32 +31,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <a href="cart.html">Cart</a>
 </nav>
 
-<h1>Fire Events</h1>
-<p>Buttons below trigger custom Contentsquare and Heap calls directly, and a raw GTM dataLayer push, for testing.</p>
+<h1>Guest / 3rd-Party Redirect Checkout</h1>
+<p>This simulates a checkout path some real customers have (guest checkout, Shop Pay, PayPal redirect, etc.) that lands on a confirmation page <strong>without</strong> the site ever calling the ecommerce commands itself &mdash; reproducing the recurring "some checkout paths don't fire the transaction" pattern.</p>
 
-<button onclick="log('CS dynamic variable set: testDvar = hello-world'); window._uxa=window._uxa||[]; window._uxa.push(['trackDynamicVariable', {key:'testDvar', value:'hello-world'}]);">
-  Set Contentsquare dynamic variable
-</button>
+<button onclick="completeGuestCheckout()">Complete guest checkout</button>
 
-<button onclick="log('CS manual pageview: events-manual'); window._uxa=window._uxa||[]; window._uxa.push(['trackPageview', 'events-manual']);">
-  Track manual Contentsquare pageview
-</button>
-
-<button onclick="log('Heap custom event: Test Event'); if (window.heap) { window.heap.track('Test Event', {source: 'sup-tag-test-site'}); } else { log('heap not loaded yet'); }">
-  Fire Heap custom event
-</button>
-
-<button onclick="log('GTM dataLayer push: test_custom_event'); window.dataLayer=window.dataLayer||[]; window.dataLayer.push({event:'test_custom_event'});">
-  Push GTM dataLayer event
-</button>
-
-<div id="log">Click a button to see what fired.</div>
+<div id="log">Click the button and note that no ec:transaction:* commands fire.</div>
 
 <script>
-function log(msg) {
-  var el = document.getElementById('log');
-  el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
-}
+  function log(msg) {
+    var el = document.getElementById('log');
+    el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
+  }
+
+  function completeGuestCheckout() {
+    // Deliberately does NOT call window._uxa.push(['ec:transaction:create', ...]) or ['ec:transaction:send'].
+    log('Order "completed" via simulated 3rd-party redirect. No ec:transaction:* commands fired — this is the gap Support sees on real checkout paths like Shop Pay / PayPal redirect.');
+  }
 </script>
 
 </body>
