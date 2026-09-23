@@ -18,20 +18,23 @@ Working state and context needed to pick this project back up in a future sessio
   it has the full local setup, run, build, and deploy instructions, plus exactly where the
   Phase 4/5 hooks (tag switcher dataLayer push, switcher UI) go in the code.
 
-## Not yet done from Phase 3 — do this before/while starting Phase 4
+## Phase 3 fully shipped (2026-09-23)
 
-- **The repo's GitHub Pages source setting still needs to be flipped once**, from "Deploy from a
-  branch" (legacy) to "GitHub Actions", at Settings → Pages → Build and deployment → Source.
-  The `.github/workflows/deploy.yml` workflow that builds+deploys on push to `main` won't
-  actually publish anything until this is changed — its build job will succeed but the deploy
-  job will fail. This wasn't flipped during the Phase 3 session; deliberately left for Waseem to
-  do (or confirm before an agent does it), since it changes a live public site's serving mode.
-- Once that's flipped, push to `main` (or re-run the workflow) and do a live-verification pass
-  on the deployed site — same browser-driven check used for Phases 1/2 — to confirm routing,
-  styling, and tag firing look right for real, not just in local preview.
-- Also worth checking then: whether the CS Main tag's History Change trigger actually catches
-  the SPA's `HashRouter` navigation (see `DEVELOPER.md`'s GTM reference section) — this was
-  flagged as a thing to verify once live, not confirmed yet either way.
+- GitHub Pages source flipped to "GitHub Actions" (was "Deploy from a branch"). Confirmed via
+  `gh api repos/waseemaboliel/sup-tag-test-site/pages` → `build_type: "workflow"`.
+- Pushed the SPA rebuild, then had to manually re-run the deploy workflow once
+  (`gh workflow run deploy.yml`) — the very first push landed *while* Pages was still on the
+  legacy branch-deploy source, so a stale legacy "pages build and deployment" run raced the new
+  Actions deploy and briefly overwrote it with the raw unbuilt `index.html` (served
+  `/src/main.jsx` directly, `errors.html` 404'd). The re-run after the source flip fixed it
+  cleanly — future pushes shouldn't hit this since the source is now permanently on Actions.
+- Live-verified on the actual deployed site (not just local preview) via browser: home page
+  renders correctly, GTM snippet fires (`GTM-W925CGJH` present in both the SPA shell and
+  `errors.html`), `errors.html`/`api-errors.html` both resolve as real standalone pages.
+- **Still open:** whether the CS Main tag's History Change trigger actually catches the SPA's
+  `HashRouter` navigation hasn't been directly confirmed (would need checking GTM's debug/preview
+  mode while clicking SPA routes on the live site) — flagged in `DEVELOPER.md`'s GTM reference
+  section as the first thing to check if Artificial Pageviews don't show up as expected.
 
 ## GTM container
 
