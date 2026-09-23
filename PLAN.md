@@ -87,11 +87,11 @@ still can't be meaningfully tested since it remains paused (untouched by this ph
 "Paused" as its non-firing reason regardless of the exception, until Phase 15 or a manual
 unpause changes that.
 
-## Phase 5 — Re-add Hotjar (Legacy Tracking Code)
+## Phase 5 — Re-add Hotjar + Finish Heap Rollout
 
-**Priority: high (new, 2026-09-23). Depends on Phase 4's switcher existing (Hotjar becomes the 3rd switchable source) — do this right after Phase 4.**
+**Priority: high (new, 2026-09-23; scope expanded 2026-09-23 to also close out Heap). Depends on Phase 4's switcher existing (Hotjar becomes the 3rd switchable source) — do this right after Phase 4. Expected to be the last GTM console work this project needs for a while — once both parts land, all 3 vendor tags are fully wired to the switcher with no pending config debt.**
 
-**Goal:** bring Hotjar back in using the real legacy Tracking Code (TC), reusing the Hotjar site Waseem is getting admin access to.
+**Goal:** bring Hotjar back in using the real legacy Tracking Code (TC), reusing the Hotjar site Waseem is getting admin access to — and finish the one loose end left over from Phase 4: the Heap tag is fully wired to the switcher (`Exception - Heap Disabled` is attached and confirmed correct) but still sits paused in GTM, so it's never actually been observed firing for real.
 
 **Researched from `github.com/hotjar/sandbox`** (Hotjar Support's own public sandbox repo, served at `sandbox.hotjar.com` — checked 2026-09-23):
 - Confirmed the site ID in their tracking snippet is **`2866949`** — the exact same ID as `https://insights.hotjar.com/sites/2866949/dashboard`, the dashboard Waseem is getting admin access to. **This is literally Hotjar Support's own internal sandbox site** — no new Hotjar account/site is needed to get the tag itself working; only *viewing* results (recordings, heatmaps) in the dashboard is gated on the pending admin access. The tag can be wired up and go live before that access lands.
@@ -111,14 +111,21 @@ unpause changes that.
 - Their repo shows two install patterns worth knowing about (mirrors the CS "official template vs. direct/manual snippet" comparison already planned in Phase 7/old-Phase-4): the tag hardcoded directly in `<head>` on their main `index.html`, vs. loaded through their *own* separate GTM container (`GTM-TQGPGN3`, not ours, not to be touched) on their `gtm-home.html` page. There's also a leftover commented-out `<div data-hotjar-id="2866949">` from an old ticket repro (ticket 262030) — a div-based install variant worth knowing exists but not urgent to replicate.
 - Their events/attributes API calls (from `public/resources/scripts/functions.js`), useful reference for a later events-testing page: `window.hj('event', 'eventName')` and `window.hj('identify', userId, { attr: value, ... })`.
 
-**Add:**
-- Wire the snippet above into `GTM-W925CGJH` as a new Custom HTML tag (keeps all 3 vendors under one container, consistent with how CS/Heap are managed), gated by the Phase 4 "Active Tags contains 'hotjar'" trigger, published live but effectively inert until included in an active switcher selection.
+**Add — Hotjar:**
+- Wire the snippet above into `GTM-W925CGJH` as a new Custom HTML tag (keeps all 3 vendors under one container, consistent with how CS/Heap are managed).
+- Add a `Exception - Hotjar Disabled` trigger, following the exact Phase 4 pattern (Custom Event, event name regex `.*`, condition `DLV - Active Tags` does not contain `hotjar`), and attach it as an Exception on the new Hotjar tag.
+- Publish. Tag goes live but is effectively inert until a visitor's switcher selection actually includes `hotjar`.
 - Re-add Hotjar mentions to the site's nav/info box/README (previously explicitly stripped out when Hotjar was ruled out of scope) — remove the "Hotjar is out of scope" language everywhere it still appears.
 - Once Waseem's admin access to the dashboard lands, do a live-verification pass (same browser-driven network/console check used for Phases 1–2) confirming recordings/heatmaps actually populate at `insights.hotjar.com/sites/2866949`.
 
-**Why:** completes the 3-vendor lineup the switcher (Phase 4) is designed around, using a real, already-live site ID instead of a placeholder.
+**Add — Heap:**
+- Unpause the existing Heap Tag in `GTM-W925CGJH` (App ID `209188840`, permanently approved by Mohammad Al-Badah — no longer just a placeholder, see the roadmap intro). Its `Exception - Heap Disabled` trigger is already attached and confirmed correctly wired from Phase 4 — unpausing is the only remaining step.
+- Publish alongside the Hotjar changes above (one version covers both).
+- Live-verify Heap actually fires when the switcher is set to `heap` or `all` (same GTM Preview/Tag Assistant method used to verify Phase 4, but this time checking Heap's tag status specifically, not just that the exception is attached) — this hasn't been possible to confirm until now since the tag was paused throughout Phase 4.
 
-**Status:** not started — blocked only on Phase 4 landing first; not blocked on the pending Hotjar dashboard admin access (that only gates *verification*, not the tag going live).
+**Why:** completes the 3-vendor lineup the switcher (Phase 4) is designed around using a real, already-live Hotjar site ID instead of a placeholder, and closes out the one piece of Phase 4 that couldn't be finished at the time (Heap was paused for unrelated historical reasons — see `CONTINUE.md` — throughout that phase's GTM work).
+
+**Status:** not started — blocked only on Phase 4 landing first (done); not blocked on the pending Hotjar dashboard admin access (that only gates *verification*, not the tag going live).
 
 ## Phase 6 — User Identity & Session
 
