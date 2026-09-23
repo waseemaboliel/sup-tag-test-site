@@ -163,8 +163,15 @@ How it works:
   SPA, and a small vanilla-JS-rendered version duplicated in `public/errors.html` and
   `public/api-errors.html`. Both read/write the same `localStorage` key
   (`supTagTestSite.activeTags`), so a choice made on one made carries over to the other.
-- Clicking a mode reloads the page — GTM evaluates firing triggers once per load, so a live
-  in-page toggle without a reload wouldn't actually change which tags fire.
+- Clicking a mode writes `?tags=<mode>` into the URL (path/hash preserved) and navigates there,
+  which reloads the page — GTM evaluates firing triggers once per load, so a live in-page toggle
+  without a reload wouldn't actually change which tags fire. Putting the mode in the URL also
+  makes the current selection visible at a glance instead of only living invisibly in
+  `localStorage` — this was a deliberate fix after the first version only wrote to
+  `localStorage` and reloaded in place, which left no visible confirmation the switch worked.
+  Note this only updates the URL at the moment you click a switcher button — regular nav-link
+  clicks elsewhere don't carry `?tags=` forward, though the underlying `localStorage` preference
+  still applies correctly on the next page regardless.
 
 **This is app-code-only.** The GTM side (a Data Layer Variable + a firing condition on each
 vendor tag) still needs to be configured in the GTM console and published — see `PLAN.md` Phase

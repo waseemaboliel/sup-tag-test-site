@@ -142,7 +142,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (m.value === current) btn.className = 'active';
     btn.onclick = function () {
       try { localStorage.setItem(STORAGE_KEY, m.value); } catch (e) {}
-      window.location.reload();
+      var url = new URL(window.location.href);
+      url.searchParams.set('tags', m.value);
+      window.location.href = url.toString();
     };
     container.appendChild(btn);
   });

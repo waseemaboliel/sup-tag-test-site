@@ -19,14 +19,16 @@ export function getActiveTagMode() {
   return 'all'
 }
 
-// Reloads the page so the inline dataLayer push in index.html re-runs with the new mode —
-// GTM's tags evaluate their firing triggers once at load, so a reload is required for the
-// change to actually take effect.
+// Persists the choice and navigates to a URL with ?tags=<mode> set (path/hash unchanged) —
+// this both reflects the current mode visibly in the address bar and forces a full page load,
+// which is required anyway since GTM's tags evaluate their firing triggers once at load time.
 export function setActiveTagMode(mode) {
   try {
     localStorage.setItem(STORAGE_KEY, mode)
   } catch (e) {
     // ignore
   }
-  window.location.reload()
+  const url = new URL(window.location.href)
+  url.searchParams.set('tags', mode)
+  window.location.href = url.toString()
 }
