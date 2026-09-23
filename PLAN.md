@@ -39,7 +39,7 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
 
 **Status:** done (2026-09-23, router revised same day — see above). Rebuilt with Vite + React + React Router; all 6 pages (Home, Page Two, Events, Cart, Checkout, Guest Checkout) ported to SPA routes; `errors.html`/`api-errors.html` kept as real standalone documents in `public/`, restyled to match but otherwise untouched (no React/JS bundle). New design system in `src/styles.css`. GitHub Actions workflow (`.github/workflows/deploy.yml`) added to build + deploy to Pages on push; GitHub Pages source flipped to "GitHub Actions". Full setup/run/deploy/dependency documentation in `DEVELOPER.md`. Verified locally and live: clicked through routes and both standalone pages via browser automation, confirmed routing, log buttons, and GTM snippets all work.
 
-## Phase 4 — Tag Switcher / Unified Tag Control — App side done, GTM config pending
+## Phase 4 — Tag Switcher / Unified Tag Control — Done
 
 **Priority: high (new, 2026-09-23). Depends on Phase 3's SPA shell existing (build the switcher once, natively, inside the new layout/nav component) — do this right after Phase 3, or as part of the same PR if that's cleaner.**
 
@@ -65,17 +65,27 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
   the choice persists through a reload, and it carries across from an SPA route to a standalone
   MPA page (shared `localStorage`, confirmed via browser automation).
 
-**Still needed — GTM console changes** (can't be done from code; someone needs to make these in
-`GTM-W925CGJH` and publish a new version):
-1. Add a **Data Layer Variable** named `Active Tags`, reading the `activeTags` key.
-2. Add a **firing condition** to the Contentsquare Main tag: `Active Tags` contains `cs`.
-3. Add the same kind of firing condition to the Heap tag: `Active Tags` contains `heap`.
-4. (Hotjar's tag doesn't exist yet — its `Active Tags contains 'hotjar'` condition gets added as part of Phase 5.)
-5. Publish.
+**GTM console side — done and published (2026-09-23).** Implemented as blocking-trigger
+"Exceptions" rather than firing conditions, so the existing `All Pages` + `History Change`
+firing triggers on each tag didn't need to be touched at all:
+1. Data Layer Variable `DLV - Active Tags`, reading the `activeTags` key.
+2. Trigger `Exception - CS Disabled` — Custom Event, event name regex `.*` (matches any event,
+   so it evaluates correctly regardless of whether the tag is firing from `All Pages` or
+   `History Change`), condition `DLV - Active Tags` does not contain `cs`.
+3. Trigger `Exception - Heap Disabled` — same pattern, does not contain `heap`.
+4. Both added as **Exceptions** (not firing triggers) on their respective tags — CS Main tag
+   and Heap Tag keep their original firing triggers unchanged, just get blocked when the
+   exception trigger also matches.
+5. (Hotjar's `Exception - Hotjar Disabled` gets added as part of Phase 5, once its tag exists.)
+6. Published to `GTM-W925CGJH`.
 
-Until this GTM-side work is done, the switcher's UI and dataLayer push are fully functional but
-have **no effect yet** — both tags still fire on every page regardless of the selected mode,
-since GTM isn't checking `Active Tags` for anything yet.
+**Verified live by Waseem** after publishing: dataLayer/mode checks and GTM Preview/Tag
+Assistant checks (both the `Container loaded` event and, critically, the `History Change` event
+from an in-SPA nav click) all behaved as expected — CS Main tag fires under `all`/`cs` and is
+correctly blocked under `heap`/`hotjar`, including during SPA route changes. Heap Tag itself
+still can't be meaningfully tested since it remains paused (untouched by this phase) — it shows
+"Paused" as its non-firing reason regardless of the exception, until Phase 15 or a manual
+unpause changes that.
 
 ## Phase 5 — Re-add Hotjar (Legacy Tracking Code)
 

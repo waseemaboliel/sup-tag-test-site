@@ -178,10 +178,14 @@ How it works:
   clicks elsewhere don't carry `?tags=` forward, though the underlying `localStorage` preference
   still applies correctly on the next page regardless.
 
-**This is app-code-only.** The GTM side (a Data Layer Variable + a firing condition on each
-vendor tag) still needs to be configured in the GTM console and published — see `PLAN.md` Phase
-4 for the exact steps. Until that's done, the switcher's UI works and the correct data reaches
-`window.dataLayer`, but every tag still fires regardless of the selected mode.
+**GTM side is configured and published** (in `GTM-W925CGJH`, not in this repo's code): a Data
+Layer Variable `DLV - Active Tags`, plus a blocking-trigger "Exception" per vendor
+(`Exception - CS Disabled`, `Exception - Heap Disabled`) attached to each tag — implemented as
+exceptions rather than firing-condition edits so the tags' existing `All Pages`/`History Change`
+triggers didn't need to change. See `PLAN.md` Phase 4 for the exact setup and how it was
+verified (including that the exception correctly applies during SPA route changes, not just the
+initial pageview). Adding a 4th vendor later (e.g. Hotjar in Phase 5) means repeating this same
+pattern: a new exception trigger + attaching it to the new tag.
 
 ## GTM / tag reference
 

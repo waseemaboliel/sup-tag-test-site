@@ -5,10 +5,10 @@ Working state and context needed to pick this project back up in a future sessio
 ## Current state
 
 - Phase 0 (site skeleton + GTM setup), Phase 1 (Ecommerce & Transactions), Phase 2 (Error
-  Analysis), Phase 3 (SPA/npm rebuild), and Phase 4 (Tag Switcher)'s app-code side are all done
-  and live-verified on the actual deployed site (not just local preview). Phase 4's GTM console
-  side (Data Layer Variable + firing conditions) is **not** done — see "Phase 4" below. Phase 5
-  (Re-add Hotjar) is next up after that, not started. See `PLAN.md`.
+  Analysis), Phase 3 (SPA/npm rebuild), and Phase 4 (Tag Switcher — app code AND the GTM console
+  side) are all done, published, and live-verified end-to-end, including that the CS tag
+  actually gets blocked/allowed correctly under each mode. Phase 5 (Re-add Hotjar) is next up,
+  not started. See `PLAN.md`.
 - Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date through the
   BrowserRouter/404.html router migration (see below), pushed and live-verified.
 - Repo: https://github.com/waseemaboliel/sup-tag-test-site (public)
@@ -58,18 +58,25 @@ several URLs before pushing (since `vite preview` doesn't reproduce GitHub Pages
 then live-verified the real thing on the deployed site. Full explanation in `DEVELOPER.md`'s
 "Clean URLs on GitHub Pages" section — **read that before changing routing or adding pages.**
 
-**GTM console work still needed (not done, not automatable from here):**
-1. Add a Data Layer Variable `Active Tags` (reads the `activeTags` dataLayer key).
-2. Add a firing condition to the CS Main tag: `Active Tags` contains `cs`.
-3. Same for the Heap tag: `Active Tags` contains `heap`.
-4. Hotjar's condition gets added once Phase 5 creates that tag.
-5. Publish a new GTM-W925CGJH version.
+**GTM console side — done and published (2026-09-23).** Built via an agent driving the GTM UI
+directly (tagmanager.google.com, signed in under the "Waseem Sandbox" Google account — NOT the
+Contentsquare work account, which has no access to this container). Implemented as
+blocking-trigger **Exceptions** rather than editing the tags' firing triggers, so `All Pages`/
+`History Change` on each tag were left untouched:
+1. Data Layer Variable `DLV - Active Tags` (reads the `activeTags` dataLayer key).
+2. Trigger `Exception - CS Disabled` — Custom Event, event name regex `.*` (matches any event
+   name, so the exception evaluates correctly on both `All Pages`-triggered and
+   `History Change`-triggered evaluations, not just page load), condition
+   `DLV - Active Tags` does not contain `cs`.
+3. Trigger `Exception - Heap Disabled` — same shape, does not contain `heap`.
+4. Both attached as **Exceptions** (found via the Triggering box → click into it → "Add
+   Exception", not obvious at first glance) on their respective tags.
+5. Published.
 
-Until this is done, the switcher UI is fully functional and the correct data reaches
-`window.dataLayer`, but it has **zero actual effect** — GTM isn't checking `Active Tags` for
-anything yet, so both tags keep firing on every page regardless of the selected mode. This was
-deliberately left for Waseem to do (or explicitly hand to an agent via browser automation) rather
-than done unilaterally, since it means editing and publishing the live shared GTM container.
+Waseem verified live after publishing (dataLayer checks + GTM Preview/Tag Assistant, including
+specifically checking the `History Change` event triggered by an in-SPA nav click, not just the
+initial pageview) — confirmed working as expected. Hotjar's `Exception - Hotjar Disabled` will
+follow the same pattern once Phase 5 creates that tag.
 
 ## GTM container
 
@@ -83,8 +90,8 @@ than done unilaterally, since it means editing and publishing the live shared GT
 
 ## Known blockers / open items
 
-- **GTM config for the tag switcher (Phase 4)** — see above, not done yet.
 - **Hotjar tag** — not wired up yet. Real snippet/site ID already researched, see `PLAN.md` Phase 5. **Hotjar is back in scope** (the earlier "explicitly out of scope" decision was reversed 2026-09-23 — ignore any older note that says otherwise).
+- **Heap Tag stays paused** in `GTM-W925CGJH` regardless of the switcher — the exception logic is wired up correctly on it, but pause state overrides everything, so it can't be meaningfully tested firing until/unless it's unpaused (a separate decision from Phase 4, not made here).
 
 ## How this site is structured
 
