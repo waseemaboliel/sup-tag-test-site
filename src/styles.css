@@ -40,6 +40,38 @@ body {
   font-weight: 600;
 }
 
+.tag-switcher {
+  display: flex;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.tag-switcher button {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+}
+
+.tag-switcher button:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.tag-switcher button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
 .nav {
   display: flex;
   flex-wrap: wrap;

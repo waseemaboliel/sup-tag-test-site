@@ -143,6 +143,34 @@ Only do this when the point is specifically to have a **real, separate page load
    `MPA` badge, matching the existing two) to `src/components/Layout.jsx`'s nav so the SPA can
    link out to it too.
 
+## Tag switcher (Phase 4)
+
+Every page has a segmented control in the header — **All / Contentsquare / Heap / Hotjar** —
+letting a visitor choose which vendor tag(s) actually fire. Default is `all`.
+
+How it works:
+- An inline `<script>` block, placed **before** the GTM snippet, runs on every page load. It
+  resolves the active mode (URL `?tags=` param → sticky `localStorage` value → default `'all'`),
+  persists it back to `localStorage`, and pushes `{ activeTags: [...] }` to `window.dataLayer`
+  before GTM's own script tag loads — so GTM's tags can check it via a Data Layer Variable at
+  the moment they evaluate their firing triggers.
+- This inline block is **byte-identical across `index.html`, `public/errors.html`, and
+  `public/api-errors.html`** — it has to run inline and synchronously in each document
+  separately (no shared JS module works here since two of these documents don't load a bundle
+  at all). If you change the logic, update all three.
+- The visible control itself has two implementations that must be kept in sync by hand:
+  `src/lib/tagSwitcher.js` + the `TagSwitcher` component in `src/components/Layout.jsx` for the
+  SPA, and a small vanilla-JS-rendered version duplicated in `public/errors.html` and
+  `public/api-errors.html`. Both read/write the same `localStorage` key
+  (`supTagTestSite.activeTags`), so a choice made on one made carries over to the other.
+- Clicking a mode reloads the page — GTM evaluates firing triggers once per load, so a live
+  in-page toggle without a reload wouldn't actually change which tags fire.
+
+**This is app-code-only.** The GTM side (a Data Layer Variable + a firing condition on each
+vendor tag) still needs to be configured in the GTM console and published — see `PLAN.md` Phase
+4 for the exact steps. Until that's done, the switcher's UI works and the correct data reaches
+`window.dataLayer`, but every tag still fires regardless of the selected mode.
+
 ## GTM / tag reference
 
 - **Container:** `GTM-W925CGJH` (Waseem's own sandbox container — do not confuse with

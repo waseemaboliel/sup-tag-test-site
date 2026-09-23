@@ -8,9 +8,11 @@ Working state and context needed to pick this project back up in a future sessio
   Analysis), and Phase 3 (SPA/npm rebuild) are done. Phases 3's build has been verified locally
   (`npm run build` + `npm run preview`, clicked through via browser automation) but **not yet
   verified on the live deployed site** — see "Not yet done" below.
-- Phase 4 (Tag Switcher) and Phase 5 (Re-add Hotjar) are next up, not started. See `PLAN.md`.
-- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ (still serving the OLD static
-  HTML as of this note — see below)
+- Phase 4 (Tag Switcher) app-code side is done; its GTM console side (Data Layer Variable +
+  firing conditions) is not — see "Phase 4" below. Phase 5 (Re-add Hotjar) is next up after that,
+  not started. See `PLAN.md`.
+- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date through Phase 4's
+  app-code changes as of this note.
 - Repo: https://github.com/waseemaboliel/sup-tag-test-site (public)
 - **The project is no longer plain static HTML.** It's now a Vite + React + React Router SPA,
   with two pages (`public/errors.html`, `public/api-errors.html`) deliberately kept as real
@@ -36,28 +38,56 @@ Working state and context needed to pick this project back up in a future sessio
   mode while clicking SPA routes on the live site) — flagged in `DEVELOPER.md`'s GTM reference
   section as the first thing to check if Artificial Pageviews don't show up as expected.
 
+## Phase 4 — Tag Switcher (2026-09-23)
+
+App-code side is fully done and live-verified locally (see `PLAN.md` Phase 4 for exact detail):
+inline dataLayer-push script (URL `?tags=` → localStorage → default `all`) duplicated
+byte-identically across `index.html`/`public/errors.html`/`public/api-errors.html`; visible
+"All / Contentsquare / Heap / Hotjar" segmented control in the header (React in the SPA, vanilla
+JS on the two standalone pages), backed by the shared `localStorage` key
+`supTagTestSite.activeTags`. Confirmed via browser automation: switching modes updates
+`window.dataLayer`, persists through reload, and carries over between the SPA and the standalone
+pages correctly.
+
+**Not yet pushed to the live site as of writing this note** — was about to push + rely on the
+now-working auto-deploy (no more manual Pages-source flip needed, that's permanent now).
+
+**GTM console work still needed (not done, not automatable from here):**
+1. Add a Data Layer Variable `Active Tags` (reads the `activeTags` dataLayer key).
+2. Add a firing condition to the CS Main tag: `Active Tags` contains `cs`.
+3. Same for the Heap tag: `Active Tags` contains `heap`.
+4. Hotjar's condition gets added once Phase 5 creates that tag.
+5. Publish a new GTM-W925CGJH version.
+
+Until this is done, the switcher UI is fully functional and the correct data reaches
+`window.dataLayer`, but it has **zero actual effect** — GTM isn't checking `Active Tags` for
+anything yet, so both tags keep firing on every page regardless of the selected mode. This was
+deliberately left for Waseem to do (or explicitly hand to an agent via browser automation) rather
+than done unilaterally, since it means editing and publishing the live shared GTM container.
+
 ## GTM container
 
 - Container ID: `GTM-W925CGJH` — a fresh sandbox container created for this project, owned by Waseem.
 - Published version is live (not just a draft).
 - Tags currently in it:
   - **Contentsquare - Main tag (web)** — official template, project `3977`, tag ID `2c5142b15f133`. **Active/live.**
-  - **Heap Tag** — Custom HTML, copied in as a starting point. **Paused.** Still carries a borrowed/placeholder Heap App ID (`209188840`) that belongs to Mohammad Al-Badah — do not unpause or publish anything that relies on this actually reaching Heap until Support has its own App ID.
+  - **Heap Tag** — Custom HTML. **Paused.** App ID `209188840`, belongs to Mohammad Al-Badah, who has **permanently** approved its use (no longer a temporary placeholder — see `PLAN.md` intro and Phase 15 for eventually replacing it with Support's own ID).
 - This container was originally seeded by copying two tags out of `GTM-W989V5M` (Mohammad Al-Badah's own container) using GTM's "copy to another container" action, which does not modify the source. Nothing in `GTM-W989V5M` was ever changed — don't touch it.
 - To change anything in GTM-W925CGJH: go to tagmanager.google.com, open the container, edit, then **Submit/Publish a new version** (draft changes alone don't go live).
 
 ## Known blockers / open items
 
-- **Heap App ID:** still using Mohammad's borrowed ID as a placeholder. Waseem messaged a colleague (Jake) asking if there's an existing Heap App ID for a Support test/sandbox environment. If/when a real ID arrives: update the Heap Tag in GTM-W925CGJH, unpause it, and publish a new version.
-- **Hotjar:** explicitly out of scope for this entire project — don't add it back in.
+- **GTM config for the tag switcher (Phase 4)** — see above, not done yet.
+- **Hotjar tag** — not wired up yet. Real snippet/site ID already researched, see `PLAN.md` Phase 5. **Hotjar is back in scope** (the earlier "explicitly out of scope" decision was reversed 2026-09-23 — ignore any older note that says otherwise).
 
 ## How this site is structured
 
-- Every page loads the GTM-W925CGJH snippet (head script block + body noscript iframe) — copy that block exactly when adding new pages.
-- Each page has a nav bar linking every existing page — update all pages' nav when adding a new page, not just the new one.
-- Each page has a `<div id="log">` + a `log(msg)` JS helper that prepends timestamped messages — reuse this pattern for consistency.
-- Style is a single inline `<style>` block per page (no shared CSS file) — copy the existing block from any page when starting a new one.
-- Page copy should be plain usage instructions ("click a button to fire X, then check Y") — no roadmap/PLAN.md cross-references or implementation-history notes in the page content itself (Waseem asked for these to be removed once already).
+See `DEVELOPER.md` — it now covers this in more detail (project structure, adding a page, the
+tag switcher, dependency rationale) and supersedes the old bullet-point version of this section.
+Quick pointers: GTM snippet + the tag-switcher inline script must both be copied
+byte-identical when adding a new standalone page; SPA pages reuse `EventLog`/`useEventLog` for
+the log pattern instead of duplicating it; styling is `src/styles.css` (SPA) and
+`public/shared.css` (standalone pages) — kept in sync by hand, not shared via import.
 
 ## Verification workflow used so far
 

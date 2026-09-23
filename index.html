@@ -4,17 +4,31 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Support Tag Test Site</title>
-<!-- Google Tag Manager -->
 <!--
-  Phase 4 TODO (tag switcher): before this snippet loads, read the user's tag
-  choice from localStorage (key: supTagTestSite.activeTags) or a `?tags=`
-  URL override, defaulting to 'all', and push it to the dataLayer, e.g.:
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ activeTags: ['cs', 'heap', 'hotjar'] });
-  Then in GTM (GTM-W925CGJH), add a Data Layer Variable "Active Tags" and a
-  firing condition on each vendor tag: "Active Tags contains 'cs'", etc.
-  See PLAN.md Phase 4 for the full design.
+  Tag switcher (PLAN.md Phase 4). Must run inline, before the GTM snippet below,
+  so the dataLayer already has `activeTags` set by the time GTM's tags evaluate
+  their firing triggers. Reads a `?tags=` URL override first, falls back to the
+  sticky localStorage choice, defaults to 'all'. Persists the resolved mode back
+  to localStorage so it survives navigating to a page without the query param.
+  Keep this block byte-identical across index.html / public/errors.html /
+  public/api-errors.html — see DEVELOPER.md.
 -->
+<script>
+(function () {
+  var STORAGE_KEY = 'supTagTestSite.activeTags';
+  var VALID = ['all', 'cs', 'heap', 'hotjar'];
+  var fromUrl = new URLSearchParams(window.location.search).get('tags');
+  var mode = VALID.indexOf(fromUrl) !== -1 ? fromUrl : null;
+  if (!mode) {
+    try { mode = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  }
+  if (VALID.indexOf(mode) === -1) { mode = 'all'; }
+  try { localStorage.setItem(STORAGE_KEY, mode); } catch (e) {}
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ activeTags: mode === 'all' ? ['cs', 'heap', 'hotjar'] : [mode] });
+})();
+</script>
+<!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

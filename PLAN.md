@@ -39,7 +39,7 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
 
 **Status:** done (2026-09-23). Rebuilt with Vite + React + React Router (`HashRouter`); all 6 pages (Home, Page Two, Events, Cart, Checkout, Guest Checkout) ported to SPA routes; `errors.html`/`api-errors.html` kept as real standalone documents in `public/`, restyled to match but otherwise untouched (no React/JS bundle). New design system in `src/styles.css`. GitHub Actions workflow (`.github/workflows/deploy.yml`) added to build + deploy to Pages on push — **still needs the one-time repo setting flip (Settings → Pages → Source → GitHub Actions), not yet done as of this commit.** Full setup/run/deploy/dependency documentation in the new `DEVELOPER.md`. Verified locally: `npm run build` + `npm run preview`, clicked through routes and both standalone pages via browser automation, confirmed hash routing, log buttons, and GTM snippets all work.
 
-## Phase 4 — Tag Switcher / Unified Tag Control
+## Phase 4 — Tag Switcher / Unified Tag Control — App side done, GTM config pending
 
 **Priority: high (new, 2026-09-23). Depends on Phase 3's SPA shell existing (build the switcher once, natively, inside the new layout/nav component) — do this right after Phase 3, or as part of the same PR if that's cleaner.**
 
@@ -54,7 +54,28 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
 
 **Why:** different Support colleagues want different signal-to-noise — someone debugging a Heap-only ticket doesn't want CS/Hotjar console noise or cross-vendor session overlap, but the default experience should still be "everything fires," matching how the site behaves today.
 
-**Status:** not started.
+**Status:** app/code side done (2026-09-23) — GTM console side still pending. Shipped:
+- The inline dataLayer-push script (URL `?tags=` override → localStorage → default `'all'`) in
+  `index.html`, `public/errors.html`, and `public/api-errors.html` — byte-identical across all
+  three so the choice is honored no matter which document loads first.
+- The visible "All / Contentsquare / Heap / Hotjar" segmented control in the shared header,
+  present on every page (React component in the SPA, a small vanilla-JS-rendered equivalent on
+  the two standalone pages) — selecting a mode persists to `localStorage` and reloads.
+- Verified locally: switching modes updates `window.dataLayer`'s `activeTags` entry correctly,
+  the choice persists through a reload, and it carries across from an SPA route to a standalone
+  MPA page (shared `localStorage`, confirmed via browser automation).
+
+**Still needed — GTM console changes** (can't be done from code; someone needs to make these in
+`GTM-W925CGJH` and publish a new version):
+1. Add a **Data Layer Variable** named `Active Tags`, reading the `activeTags` key.
+2. Add a **firing condition** to the Contentsquare Main tag: `Active Tags` contains `cs`.
+3. Add the same kind of firing condition to the Heap tag: `Active Tags` contains `heap`.
+4. (Hotjar's tag doesn't exist yet — its `Active Tags contains 'hotjar'` condition gets added as part of Phase 5.)
+5. Publish.
+
+Until this GTM-side work is done, the switcher's UI and dataLayer push are fully functional but
+have **no effect yet** — both tags still fire on every page regardless of the selected mode,
+since GTM isn't checking `Active Tags` for anything yet.
 
 ## Phase 5 — Re-add Hotjar (Legacy Tracking Code)
 

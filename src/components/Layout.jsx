@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { getActiveTagMode, setActiveTagMode, TAG_MODES } from '../lib/tagSwitcher.js'
 
 const spaLinks = [
   { to: '/', label: 'Home' },
@@ -7,6 +9,31 @@ const spaLinks = [
   { to: '/cart', label: 'Cart' },
 ]
 
+function TagSwitcher() {
+  const [mode, setMode] = useState(getActiveTagMode)
+
+  function choose(value) {
+    if (value === mode) return
+    setMode(value)
+    setActiveTagMode(value) // persists to localStorage + reloads the page
+  }
+
+  return (
+    <div className="tag-switcher" role="group" aria-label="Active tags">
+      {TAG_MODES.map((m) => (
+        <button
+          key={m.value}
+          type="button"
+          className={m.value === mode ? 'active' : ''}
+          onClick={() => choose(m.value)}
+        >
+          {m.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function Layout({ children }) {
   const location = useLocation()
 
@@ -14,12 +41,7 @@ export default function Layout({ children }) {
     <div className="shell">
       <header className="topbar">
         <span className="brand">Support Tag Test Site</span>
-        {/*
-          Phase 4 TODO (tag switcher): the "All / CS / Heap / Hotjar" control lives here,
-          in the shared header, so it's present on every SPA route in one place. See
-          index.html's top-of-file comment for the dataLayer side of this, and PLAN.md
-          Phase 4 for the full design (localStorage + ?tags= override + GTM firing rules).
-        */}
+        <TagSwitcher />
       </header>
 
       <nav className="nav">

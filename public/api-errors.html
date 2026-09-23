@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>API Errors - Support Tag Test Site</title>
 <link rel="stylesheet" href="./shared.css">
+<!--
+  Tag switcher (PLAN.md Phase 4). Keep this block byte-identical across
+  index.html / public/errors.html / public/api-errors.html — see DEVELOPER.md.
+-->
+<script>
+(function () {
+  var STORAGE_KEY = 'supTagTestSite.activeTags';
+  var VALID = ['all', 'cs', 'heap', 'hotjar'];
+  var fromUrl = new URLSearchParams(window.location.search).get('tags');
+  var mode = VALID.indexOf(fromUrl) !== -1 ? fromUrl : null;
+  if (!mode) {
+    try { mode = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  }
+  if (VALID.indexOf(mode) === -1) { mode = 'all'; }
+  try { localStorage.setItem(STORAGE_KEY, mode); } catch (e) {}
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ activeTags: mode === 'all' ? ['cs', 'heap', 'hotjar'] : [mode] });
+})();
+</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -20,7 +39,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
 <div class="shell">
-  <div class="topbar">Support Tag Test Site</div>
+  <div class="topbar">
+    <span>Support Tag Test Site</span>
+    <div class="tag-switcher" id="tagSwitcher" role="group" aria-label="Active tags"></div>
+  </div>
 
   <nav class="nav">
     <a href="./#/">Home</a>
@@ -95,6 +117,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window._uxa.push(['api-errors:maskUrl', 'https://jsonplaceholder.typicode.com/posts/999999?email=test@example.com&card=4111111111111111']);
     log('Pushed api-errors:maskUrl for the exact PII test URL (full match)');
   }
+</script>
+
+<!--
+  Tag switcher UI widget. Keep MODES in sync with src/lib/tagSwitcher.js and with the
+  identical copy of this script in public/errors.html — see DEVELOPER.md.
+-->
+<script>
+(function () {
+  var STORAGE_KEY = 'supTagTestSite.activeTags';
+  var MODES = [
+    { value: 'all', label: 'All' },
+    { value: 'cs', label: 'Contentsquare' },
+    { value: 'heap', label: 'Heap' },
+    { value: 'hotjar', label: 'Hotjar' }
+  ];
+  var current = 'all';
+  try { current = localStorage.getItem(STORAGE_KEY) || 'all'; } catch (e) {}
+  var container = document.getElementById('tagSwitcher');
+  MODES.forEach(function (m) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = m.label;
+    if (m.value === current) btn.className = 'active';
+    btn.onclick = function () {
+      try { localStorage.setItem(STORAGE_KEY, m.value); } catch (e) {}
+      window.location.reload();
+    };
+    container.appendChild(btn);
+  });
+})();
 </script>
 
 </body>
