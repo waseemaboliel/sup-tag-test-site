@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Errors - Support Tag Test Site</title>
+<link rel="stylesheet" href="./shared.css">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W925CGJH');</script>
+<!-- End Google Tag Manager -->
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W925CGJH"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<div class="shell">
+  <div class="topbar">Support Tag Test Site</div>
+
+  <nav class="nav">
+    <a href="./#/">Home</a>
+    <a href="./#/page-two">Page Two</a>
+    <a href="./#/events">Fire Events</a>
+    <a href="./#/cart">Cart</a>
+    <a href="./errors.html">Errors <span class="mpa-tag">MPA</span></a>
+    <a href="./api-errors.html" class="active">API Errors <span class="mpa-tag">MPA</span></a>
+  </nav>
+
+  <div class="content">
+    <h1>API Errors</h1>
+    <p>
+      This is a real, standalone HTML document — not a route in the SPA. Reaching it (or
+      leaving it) is a genuine <strong>Natural Pageview</strong>. Click a button to fire a real
+      request, then check Error Analysis in the Contentsquare console (or the log below) to see
+      what was captured.
+    </p>
+
+    <h2>Trigger real API errors</h2>
+    <button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/999999', '404', 'GET')">Fetch a 404 (nonexistent post on jsonplaceholder)</button>
+    <button onclick="fireRequest('https://reqres.in/api/login', '400', 'POST', '{}')">Fetch a 400 (reqres login, missing params)</button>
+    <button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/1', '200 (control - should NOT be captured)', 'GET')">Fetch a 200 (control, should not error)</button>
+
+    <h2>PII in the request URL</h2>
+    <p>Request URLs often carry customer PII (email, order IDs) in the path/query — this is exactly why API Error collection needs masking rules before going deeper than status/endpoint/method.</p>
+    <button onclick="fireRequest('https://jsonplaceholder.typicode.com/posts/999999?email=test@example.com&card=4111111111111111', '404 with PII in query string', 'GET')">
+      Fetch a 404 with PII in the query string
+    </button>
+
+    <h2>URL masking commands</h2>
+    <p>These tell the tag to strip sensitive URL segments before collection. Fire one, then repeat the PII request above and compare what would be collected.</p>
+    <button onclick="maskPartial()">Set partial URL mask (<code>networkRequest:maskUrls</code>)</button>
+    <button onclick="maskFull()">Set full URL mask (<code>api-errors:maskUrl</code>)</button>
+
+    <div id="log" class="log">Click a button to see what fired.</div>
+  </div>
+
+  <div class="footer">
+    <p>GTM <code>GTM-W925CGJH</code> · CS project <code>3977</code> · Heap App ID <code>209188840</code></p>
+  </div>
+</div>
+
+<script>
+  function log(msg) {
+    var el = document.getElementById('log');
+    el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
+  }
+
+  function fireRequest(url, label, method, body) {
+    log('Firing ' + (method || 'GET') + ' to ' + url + ' (' + label + ')...');
+    var opts = { method: method || 'GET' };
+    if (body) {
+      opts.headers = { 'Content-Type': 'application/json' };
+      opts.body = body;
+    }
+    fetch(url, opts).then(function (r) {
+      log('Response for ' + label + ': HTTP ' + r.status);
+    }).catch(function (e) {
+      log('Fetch error for ' + label + ': ' + e.message);
+    });
+  }
+
+  function maskPartial() {
+    window._uxa = window._uxa || [];
+    window._uxa.push(['networkRequest:maskUrls', 'https://jsonplaceholder.typicode.com/posts/:id']);
+    log('Pushed networkRequest:maskUrls for https://jsonplaceholder.typicode.com/posts/:id (partial match)');
+  }
+
+  function maskFull() {
+    window._uxa = window._uxa || [];
+    window._uxa.push(['api-errors:maskUrl', 'https://jsonplaceholder.typicode.com/posts/999999?email=test@example.com&card=4111111111111111']);
+    log('Pushed api-errors:maskUrl for the exact PII test URL (full match)');
+  }
+</script>
+
+</body>
+</html>

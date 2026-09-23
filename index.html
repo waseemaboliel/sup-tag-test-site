@@ -1,16 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Support Tag Test Site</title>
-<style>
-  body { font-family: -apple-system, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.5; color: #222; }
-  nav a { margin-right: 16px; }
-  code { background: #f2f2f2; padding: 2px 6px; border-radius: 4px; }
-  .box { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 20px; }
-</style>
 <!-- Google Tag Manager -->
+<!--
+  Phase 4 TODO (tag switcher): before this snippet loads, read the user's tag
+  choice from localStorage (key: supTagTestSite.activeTags) or a `?tags=`
+  URL override, defaulting to 'all', and push it to the dataLayer, e.g.:
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ activeTags: ['cs', 'heap', 'hotjar'] });
+  Then in GTM (GTM-W925CGJH), add a Data Layer Variable "Active Tags" and a
+  firing condition on each vendor tag: "Active Tags contains 'cs'", etc.
+  See PLAN.md Phase 4 for the full design.
+-->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -24,25 +28,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="page-two.html">Page Two</a>
-  <a href="events.html">Fire Events</a>
-  <a href="cart.html">Cart</a>
-  <a href="errors.html">Errors</a>
-  <a href="api-errors.html">API Errors</a>
-</nav>
-
-<h1>Support Tag Test Site</h1>
-<p>A minimal static site for Support to test Heap / Contentsquare tags loaded through a dedicated GTM sandbox container.</p>
-
-<div class="box">
-  <strong>GTM container:</strong> <code>GTM-W925CGJH</code><br>
-  <strong>Contentsquare tag:</strong> project 3977, tag <code>2c5142b15f133</code><br>
-  <strong>Heap tag:</strong> currently using a borrowed App ID (temporary, see README) &mdash; swap this out once Support has its own Heap trial App ID.
-</div>
-
-<p>Navigate between pages to test pageview tracking, or go to <a href="events.html">Fire Events</a> to trigger custom Heap/Contentsquare events manually.</p>
-
+<div id="root"></div>
+<script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

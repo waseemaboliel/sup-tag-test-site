@@ -20,7 +20,7 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
 
 **Status:** done — `errors.html`, `api-errors.html`.
 
-## Phase 3 — SPA Conversion & npm Project Rebuild
+## Phase 3 — SPA Conversion & npm Project Rebuild — Done
 
 **Priority: high (new, 2026-09-23). Foundation for Phases 4 and 5 — build this first so the tag switcher and Hotjar tag get built natively into the new architecture instead of twice (once in static HTML, once in the SPA).**
 
@@ -37,7 +37,7 @@ Hotjar is **back in scope** (previously excluded — reversed 2026-09-23). Heap'
 
 **Why:** the current plain-HTML setup can't demonstrate APV vs. PV at all (every page load is already a Natural Pageview), and Waseem explicitly wants this treated as an opportunity to move off "simple html" into a proper project.
 
-**Status:** not started.
+**Status:** done (2026-09-23). Rebuilt with Vite + React + React Router (`HashRouter`); all 6 pages (Home, Page Two, Events, Cart, Checkout, Guest Checkout) ported to SPA routes; `errors.html`/`api-errors.html` kept as real standalone documents in `public/`, restyled to match but otherwise untouched (no React/JS bundle). New design system in `src/styles.css`. GitHub Actions workflow (`.github/workflows/deploy.yml`) added to build + deploy to Pages on push — **still needs the one-time repo setting flip (Settings → Pages → Source → GitHub Actions), not yet done as of this commit.** Full setup/run/deploy/dependency documentation in the new `DEVELOPER.md`. Verified locally: `npm run build` + `npm run preview`, clicked through routes and both standalone pages via browser automation, confirmed hash routing, log buttons, and GTM snippets all work.
 
 ## Phase 4 — Tag Switcher / Unified Tag Control
 

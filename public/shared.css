@@ -1,0 +1,153 @@
+/*
+  Standalone stylesheet for the non-SPA (MPA) pages in public/ (errors.html, api-errors.html).
+  Deliberately a separate file from src/styles.css — these pages are genuinely independent
+  documents (own <head>, no React/JS bundle), so they can't share Vite's module graph, but the
+  visual language is kept in sync by hand. If you change one, check the other.
+*/
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6f7f9;
+  color: #1c2128;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.shell {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+.topbar {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 28px;
+}
+
+.nav a {
+  color: #626873;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.nav a:hover {
+  background: #eaf0ff;
+  color: #2f6fed;
+}
+
+.nav a.active {
+  background: #2f6fed;
+  color: #fff;
+}
+
+.mpa-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #f2e6c9;
+  color: #8a6415;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.content {
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 10px;
+  padding: 28px 32px;
+}
+
+.content h1 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.content h2 {
+  font-size: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e3e6ea;
+}
+
+code {
+  background: #eaf0ff;
+  color: #2f6fed;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+}
+
+.box {
+  border: 1px solid #e3e6ea;
+  background: #f6f7f9;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-top: 20px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  text-align: left;
+  margin: 10px 0;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1c2128;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #2f6fed;
+  background: #eaf0ff;
+}
+
+.log {
+  background: #12151a;
+  color: #d6d9e0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 20px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  min-height: 44px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  color: #626873;
+  font-size: 12.5px;
+}
+
+.footer a {
+  color: #2f6fed;
+}
