@@ -87,7 +87,7 @@ still can't be meaningfully tested since it remains paused (untouched by this ph
 "Paused" as its non-firing reason regardless of the exception, until Phase 15 or a manual
 unpause changes that.
 
-## Phase 5 — Re-add Hotjar + Finish Heap Rollout
+## Phase 5 — Re-add Hotjar + Finish Heap Rollout — Done
 
 **Priority: high (new, 2026-09-23; scope expanded 2026-09-23 to also close out Heap). Depends on Phase 4's switcher existing (Hotjar becomes the 3rd switchable source) — do this right after Phase 4. Expected to be the last GTM console work this project needs for a while — once both parts land, all 3 vendor tags are fully wired to the switcher with no pending config debt.**
 
@@ -125,7 +125,7 @@ unpause changes that.
 
 **Why:** completes the 3-vendor lineup the switcher (Phase 4) is designed around using a real, already-live Hotjar site ID instead of a placeholder, and closes out the one piece of Phase 4 that couldn't be finished at the time (Heap was paused for unrelated historical reasons — see `CONTINUE.md` — throughout that phase's GTM work).
 
-**Status:** not started — blocked only on Phase 4 landing first (done); not blocked on the pending Hotjar dashboard admin access (that only gates *verification*, not the tag going live).
+**Status:** done (2026-09-23). Hotjar Tag added to `GTM-W925CGJH` with the real snippet above, `Exception - Hotjar Disabled` attached (same regex-`.*` Custom Event pattern as Phase 4); Heap Tag unpaused; both published in one version. Waseem confirmed live that everything works — all 3 vendor tags are now correctly gated by the switcher with no pending GTM config debt. Site copy updated (`Home.jsx`: "(soon) Hotjar" → "Hotjar", info box now lists the Hotjar site ID instead of the Heap/Mohammad attribution line). Still pending, but non-blocking: live-verifying actual Hotjar recordings/heatmaps at `insights.hotjar.com/sites/2866949` once Waseem's dashboard admin access lands — the tag firing itself is already confirmed, this is just confirming the *data* shows up on the Hotjar side.
 
 ## Phase 6 — User Identity & Session
 
@@ -138,7 +138,7 @@ unpause changes that.
   - Toggle a Contentsquare dynamic variable, e.g. `loggingStatus` = `logged`/`anonymous` (same pattern as the WebView checkout test page).
   - Call `heap.identify('test-user-123')` and `heap.addUserProperties({ plan: 'test' })` on login (mirrors the "Heap Identify Button" already built in Mohammad's separate Next.js test app — reference only, don't reuse his code/account).
   - Call `heap.resetIdentity()` on logout.
-  - Once Phase 5 lands: also call `window.hj('identify', 'test-user-123', { plan: 'test' })` for Hotjar parity.
+  - Also call `window.hj('identify', 'test-user-123', { plan: 'test' })` for Hotjar parity.
 
 **Why:** user-ID mapping and session-continuity issues are common between Heap and Contentsquare when identity commands are missed or mistimed.
 
@@ -197,7 +197,7 @@ unpause changes that.
 
 **Add:**
 - *(Already covered by Phase 2's `errors.html`/`api-errors.html`: PII-shaped custom errors, PII-in-URL API errors, and the `networkRequest:maskUrls`/`api-errors:maskUrl` commands. This phase is about Session Replay/DOM masking specifically, which is a separate mechanism.)*
-- A form page with password, credit-card, and email fields — some tagged with the typical masking-rule selector/class, some deliberately not — to verify Session Replay masking triggers correctly on flagged fields and doesn't accidentally mask unflagged ones. Mirrors recurring "masking rule not applying to a specific element" tickets (SUP-21751). Worth also checking Hotjar's own suppression pages (`base/suppression.html`, `base/suppression2.html` in `hotjar/sandbox`) as a reference once Phase 5 lands, for the Hotjar-side equivalent of this check.
+- A form page with password, credit-card, and email fields — some tagged with the typical masking-rule selector/class, some deliberately not — to verify Session Replay masking triggers correctly on flagged fields and doesn't accidentally mask unflagged ones. Mirrors recurring "masking rule not applying to a specific element" tickets (SUP-21751). Worth also checking Hotjar's own suppression pages (`base/suppression.html`, `base/suppression2.html` in `hotjar/sandbox`) as a reference for the Hotjar-side equivalent of this check.
 
 **Why:** PII leakage (or over-masking) is one of the highest-severity classes of ticket we handle.
 
@@ -211,7 +211,7 @@ unpause changes that.
 
 **Add:**
 - A full-screen transparent `<div>` (high z-index, `background: transparent`) sitting over real buttons/links, plus a variant that also blocks `overflow: scroll` — reproduces zoning tap mis-attribution and blocked scroll (the HSBC cases, SUP-23358/23359, and existing [[cs4apps-transparent-overlays]] toolkit).
-- A custom element using `attachShadow` with clickable buttons inside its shadow root — reproduces clicks getting mis-attributed to the shadow host element instead of the actual clicked child. (Hotjar's sandbox has an equivalent `base/shadowroot.html` — worth diffing behavior once Phase 5 lands.)
+- A custom element using `attachShadow` with clickable buttons inside its shadow root — reproduces clicks getting mis-attributed to the shadow host element instead of the actual clicked child. (Hotjar's sandbox has an equivalent `base/shadowroot.html` — worth diffing behavior.)
 - A page with a lazy-loaded background-image section, an `<img loading="lazy">`, and a fixed/sticky top nav — common triggers for zoning snapshots coming back with missing sections/images despite the live page rendering fine (recurring pattern across SUP-23166, SUP-22371, SUP-22927, SUP-22825, SUP-23012, SUP-23498).
 - A stylesheet whose filename changes on every load (e.g. via a query param swap) to approximate hashed-chunk-rotation-before-scrape, the confirmed root cause of replays rendering without CSS (SUP-23308, precedent for [[sup-23308-srm-missing-css]]).
 
@@ -226,7 +226,7 @@ unpause changes that.
 **Goal:** make opt-in/opt-out behavior directly verifiable instead of just documented.
 
 **Add:**
-- Buttons calling `window._uxa.push(['optout'])` and `['optin']`, with an on-page instruction to reload and check the Network tab to confirm `c.contentsquare.net` calls actually stop after opt-out and resume after opt-in. Once Phase 5 lands, add the Hotjar equivalent (`window.hj('consent')` / Hotjar's opt-out cookie behavior) side by side.
+- Buttons calling `window._uxa.push(['optout'])` and `['optin']`, with an on-page instruction to reload and check the Network tab to confirm `c.contentsquare.net` calls actually stop after opt-out and resume after opt-in. Add the Hotjar equivalent (`window.hj('consent')` / Hotjar's opt-out cookie behavior) side by side.
 
 **Why:** "opt-out isn't stopping collection" is a recurring customer question, and having a page that proves the mechanism works removes doubt fast.
 

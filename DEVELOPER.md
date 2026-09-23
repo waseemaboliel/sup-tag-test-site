@@ -48,8 +48,8 @@ without a full reload.
 This project only really "works" as a tag-testing tool on the deployed GitHub Pages site
 (`https://waseemaboliel.github.io/sup-tag-test-site/`), for two reasons:
 
-1. **The Contentsquare project, Heap App ID, and (once Phase 5 lands) Hotjar site were all set
-   up and verified against that specific `github.io` domain.** Loading the same tags from
+1. **The Contentsquare project, Heap App ID, and Hotjar site were all set up and verified
+   against that specific `github.io` domain.** Loading the same tags from
    `localhost` may still technically fire (GTM itself doesn't hard-block by domain by default),
    but don't treat a clean run on `localhost` as proof a tag works — and don't be surprised if
    session/replay data recorded from `localhost` looks inconsistent or doesn't show up the way
@@ -184,8 +184,9 @@ Layer Variable `DLV - Active Tags`, plus a blocking-trigger "Exception" per vend
 exceptions rather than firing-condition edits so the tags' existing `All Pages`/`History Change`
 triggers didn't need to change. See `PLAN.md` Phase 4 for the exact setup and how it was
 verified (including that the exception correctly applies during SPA route changes, not just the
-initial pageview). Adding a 4th vendor later (e.g. Hotjar in Phase 5) means repeating this same
-pattern: a new exception trigger + attaching it to the new tag.
+initial pageview). A `Exception - Hotjar Disabled` trigger followed the same pattern in Phase 5
+once the Hotjar tag was added — adding any future vendor means repeating it again: a new
+exception trigger + attaching it to the new tag.
 
 ## GTM / tag reference
 
@@ -196,9 +197,11 @@ pattern: a new exception trigger + attaching it to the new tag.
   `2c5142b15f133`. Live/active.
 - **Heap tag:** Custom HTML tag, App ID `209188840` — permanently approved for our use by
   Mohammad Al-Badah (see `PLAN.md` Phase 15 for eventually replacing it with Support's own ID).
-  Currently paused in GTM — see `CONTINUE.md` for current status.
-- **Hotjar:** not wired up yet — see `PLAN.md` Phase 5 for the exact snippet/site ID to use once
-  that phase starts.
+  Live/active (unpaused in Phase 5).
+- **Hotjar tag:** Custom HTML tag, site `2866949` (Hotjar Support's own internal sandbox site —
+  see `PLAN.md` Phase 5 for the research behind that). Live/active, firing trigger is **All
+  Pages only** (not History Change — this snippet loads/reloads the whole Hotjar script, which
+  isn't meant to re-run on every SPA route change the way CS's tag is).
 
 ### Verify the History Change trigger after deploying
 

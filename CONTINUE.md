@@ -4,20 +4,20 @@ Working state and context needed to pick this project back up in a future sessio
 
 ## Current state
 
-- Phase 0 (site skeleton + GTM setup), Phase 1 (Ecommerce & Transactions), Phase 2 (Error
-  Analysis), Phase 3 (SPA/npm rebuild), and Phase 4 (Tag Switcher — app code AND the GTM console
-  side) are all done, published, and live-verified end-to-end, including that the CS tag
-  actually gets blocked/allowed correctly under each mode. Phase 5 (Re-add Hotjar) is next up,
-  not started. See `PLAN.md`.
-- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date through the
-  BrowserRouter/404.html router migration (see below), pushed and live-verified.
+- Phases 0 through 5 are all done: site skeleton, Ecommerce, Error Analysis, SPA/npm rebuild,
+  Tag Switcher (app code + GTM console), and now Hotjar + Heap unpause. All 3 vendor tags
+  (Contentsquare, Heap, Hotjar) are live in `GTM-W925CGJH`, each correctly gated by the switcher,
+  published, and confirmed working by Waseem. **No pending GTM config debt remains.** Phase 6
+  (User Identity & Session) is next up, not started. See `PLAN.md`.
+- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date, pushed and
+  live-verified.
 - Repo: https://github.com/waseemaboliel/sup-tag-test-site (public)
 - **The project is no longer plain static HTML.** It's now a Vite + React + React Router
   (`BrowserRouter`, clean URLs) SPA, with two pages (`public/errors.html`,
   `public/api-errors.html`) deliberately kept as real standalone documents outside the SPA.
   **Read `DEVELOPER.md` before touching this repo again** — it has the full local setup, run,
-  build, and deploy instructions, the clean-URLs-on-GitHub-Pages `404.html` mechanism, and
-  exactly where the Phase 5 hooks go in the code.
+  build, and deploy instructions, the clean-URLs-on-GitHub-Pages `404.html` mechanism, and the
+  tag switcher's design.
 
 ## Phase 3 fully shipped (2026-09-23)
 
@@ -75,23 +75,43 @@ blocking-trigger **Exceptions** rather than editing the tags' firing triggers, s
 
 Waseem verified live after publishing (dataLayer checks + GTM Preview/Tag Assistant, including
 specifically checking the `History Change` event triggered by an in-SPA nav click, not just the
-initial pageview) — confirmed working as expected. Hotjar's `Exception - Hotjar Disabled` will
-follow the same pattern once Phase 5 creates that tag.
+initial pageview) — confirmed working as expected.
+
+## Phase 5 — Hotjar + Heap unpause (2026-09-23)
+
+Waseem did this GTM work himself, following the checklist handed off after Phase 4:
+1. New `Hotjar Tag` (Custom HTML) in `GTM-W925CGJH` with the real snippet (`hjid: 2866949`),
+   firing trigger **All Pages only** (deliberately not History Change — this snippet
+   loads/reloads the whole Hotjar script, which isn't meant to re-run per SPA route change the
+   way CS's tag is).
+2. `Exception - Hotjar Disabled` trigger, same regex-`.*` Custom Event pattern as Phase 4's
+   exceptions, attached to the new Hotjar tag.
+3. Existing `Heap Tag` unpaused (no other changes — its exception was already correct from
+   Phase 4).
+4. Published — one version covering both.
+
+Waseem confirmed everything works live. Also updated site copy in the same session:
+`Home.jsx`'s "(soon) Hotjar" → "Hotjar", the info box now lists the Hotjar site ID instead of
+the Heap/Mohammad-attribution line, and the footer's "see DEVELOPER.md" link was dropped.
+
+**Still open, non-blocking:** once Waseem's `insights.hotjar.com/sites/2866949` dashboard admin
+access lands, do a live-verification pass confirming actual recordings/heatmaps show up there —
+the tag firing correctly is already confirmed, this only checks the data lands on Hotjar's side.
 
 ## GTM container
 
 - Container ID: `GTM-W925CGJH` — a fresh sandbox container created for this project, owned by Waseem.
 - Published version is live (not just a draft).
-- Tags currently in it:
-  - **Contentsquare - Main tag (web)** — official template, project `3977`, tag ID `2c5142b15f133`. **Active/live.**
-  - **Heap Tag** — Custom HTML. **Paused.** App ID `209188840`, belongs to Mohammad Al-Badah, who has **permanently** approved its use (no longer a temporary placeholder — see `PLAN.md` intro and Phase 15 for eventually replacing it with Support's own ID).
+- Tags currently in it, all active and each gated by the switcher's per-vendor Exception trigger:
+  - **Contentsquare - Main tag (web)** — official template, project `3977`, tag ID `2c5142b15f133`.
+  - **Heap Tag** — Custom HTML, App ID `209188840` (Mohammad Al-Badah's, permanently approved — see `PLAN.md` intro and Phase 15 for eventually replacing it with Support's own ID). Unpaused as of Phase 5.
+  - **Hotjar Tag** — Custom HTML, site `2866949` (Hotjar Support's own internal sandbox site, see `PLAN.md` Phase 5 research).
 - This container was originally seeded by copying two tags out of `GTM-W989V5M` (Mohammad Al-Badah's own container) using GTM's "copy to another container" action, which does not modify the source. Nothing in `GTM-W989V5M` was ever changed — don't touch it.
-- To change anything in GTM-W925CGJH: go to tagmanager.google.com, open the container, edit, then **Submit/Publish a new version** (draft changes alone don't go live).
+- To change anything in GTM-W925CGJH: go to tagmanager.google.com, open the container, edit, then **Submit/Publish a new version** (draft changes alone don't go live). Sign in under the "Waseem Sandbox" Google account — the Contentsquare work account has no access to this container.
 
 ## Known blockers / open items
 
-- **Hotjar tag** — not wired up yet. Real snippet/site ID already researched, see `PLAN.md` Phase 5. **Hotjar is back in scope** (the earlier "explicitly out of scope" decision was reversed 2026-09-23 — ignore any older note that says otherwise).
-- **Heap Tag stays paused** in `GTM-W925CGJH` regardless of the switcher — the exception logic is wired up correctly on it, but pause state overrides everything, so it can't be meaningfully tested firing until/unless it's unpaused (a separate decision from Phase 4, not made here).
+- **Hotjar dashboard verification** — tag firing is confirmed, but actual recordings/heatmaps at `insights.hotjar.com/sites/2866949` haven't been checked yet, pending Waseem's admin access there. Non-blocking.
 
 ## How this site is structured
 

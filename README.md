@@ -11,7 +11,8 @@ https://waseemaboliel.github.io/sup-tag-test-site/.
 - **GTM container:** `GTM-W925CGJH` (a fresh sandbox container, separate from any customer or shared container)
 - **Contentsquare tag:** official "Contentsquare - Main tag" template, project `3977`, tag ID `2c5142b15f133`
 - **Heap tag:** Custom HTML tag, App ID `209188840` — permanently approved for our use by Mohammad Al-Badah.
-- **Hotjar:** not wired up yet — see [PLAN.md](PLAN.md) Phase 5.
+- **Hotjar tag:** Custom HTML tag, site `2866949`.
+- All three are gated by a per-vendor "Exception" trigger tied to the tag switcher (All / Contentsquare / Heap / Hotjar) in the site header — see [DEVELOPER.md](DEVELOPER.md).
 
 ## Pages
 
@@ -29,8 +30,9 @@ Standalone pages (`public/`, real full-page documents outside the SPA — see [D
 
 ## Roadmap
 
-See [PLAN.md](PLAN.md) for the phased plan — currently rebuilding as an SPA with a per-vendor tag
-switcher and re-adding Hotjar (Phases 3–5), then continuing the earlier ticket-pattern backlog.
+See [PLAN.md](PLAN.md) for the phased plan. Phases 0–5 (SPA rebuild, per-vendor tag switcher,
+Hotjar + Heap rollout) are done — next up is the earlier ticket-pattern backlog starting at
+Phase 6.
 
 ## Notes
 
