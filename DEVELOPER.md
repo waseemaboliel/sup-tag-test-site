@@ -33,8 +33,10 @@ npm run dev
 ```
 
 `npm run dev` starts a local dev server (Vite prints the URL — typically
-`http://localhost:5173/`). Open it in a browser. The SPA uses hash-based routing, so its routes
-look like `http://localhost:5173/#/cart`, `http://localhost:5173/#/checkout`, etc. The two
+`http://localhost:5173/`). Open it in a browser. The SPA uses real path-based routing (clean
+URLs), so its routes look like `http://localhost:5173/cart`, `http://localhost:5173/checkout`,
+etc. — note `npm run dev` doesn't reproduce GitHub Pages' 404 behavior for deep links, see the
+"Clean URLs on GitHub Pages" section below. The two
 standalone pages are served directly: `http://localhost:5173/errors.html` and
 `http://localhost:5173/api-errors.html`.
 
@@ -94,7 +96,7 @@ index.html              Vite's SPA entry point — GTM snippet + <div id="root">
 vite.config.js           Vite config — base path MUST match the GH Pages repo path.
 src/
   main.jsx                React root bootstrap.
-  App.jsx                 HashRouter + route table. Add new SPA pages here.
+  App.jsx                 BrowserRouter + route table. Add new SPA pages here.
   styles.css              Shared design system for the SPA (CSS variables, layout, components).
   components/
     Layout.jsx             Shared header/nav/footer wrapper around every SPA route.
@@ -115,6 +117,9 @@ public/
   shared.css                Plain CSS for the two standalone pages above — kept visually in sync
                              with src/styles.css by hand (they can't share Vite's module graph
                              since these pages don't load any JS bundle).
+  404.html                  GitHub Pages' 404 fallback — redirects deep-link requests (e.g.
+                             /cart) back through index.html so BrowserRouter's clean URLs work
+                             on a static host. See "Clean URLs on GitHub Pages" below.
 .github/workflows/deploy.yml
                           Builds + deploys to GitHub Pages on every push to main.
 PLAN.md                  Feature roadmap / phases.
@@ -163,11 +168,11 @@ How it works:
   SPA, and a small vanilla-JS-rendered version duplicated in `public/errors.html` and
   `public/api-errors.html`. Both read/write the same `localStorage` key
   (`supTagTestSite.activeTags`), so a choice made on one made carries over to the other.
-- Clicking a mode writes `?tags=<mode>` into the URL (path/hash preserved) and navigates there,
-  which reloads the page — GTM evaluates firing triggers once per load, so a live in-page toggle
-  without a reload wouldn't actually change which tags fire. Putting the mode in the URL also
-  makes the current selection visible at a glance instead of only living invisibly in
-  `localStorage` — this was a deliberate fix after the first version only wrote to
+- Clicking a mode writes `?tags=<mode>` into the URL (path preserved, e.g. `/cart?tags=heap`)
+  and navigates there, which reloads the page — GTM evaluates firing triggers once per load, so
+  a live in-page toggle without a reload wouldn't actually change which tags fire. Putting the
+  mode in the URL also makes the current selection visible at a glance instead of only living
+  invisibly in `localStorage` — this was a deliberate fix after the first version only wrote to
   `localStorage` and reloaded in place, which left no visible confirmation the switch worked.
   Note this only updates the URL at the moment you click a switcher button — regular nav-link
   clicks elsewhere don't carry `?tags=` forward, though the underlying `localStorage` preference
@@ -194,18 +199,44 @@ vendor tag) still needs to be configured in the GTM console and published — se
 ### Verify the History Change trigger after deploying
 
 Waseem already added a History Change trigger to the CS Main tag config to support Artificial
-Pageviews from this SPA. Because this app uses `HashRouter` (URL changes happen in the `#hash`,
-not the path), **the GTM trigger's "Fire trigger on" setting needs to include hash changes** —
-check this in GTM (Triggers → the History Change trigger → "Fire this trigger when: Any History
-Change" should already cover it, but if artificial pageviews aren't showing up after deploying,
-this is the first thing to check) once the site is live and you can test route changes for real.
+Pageviews from this SPA. The app uses `BrowserRouter` (real `pushState`-driven path changes, not
+`#hash` changes), which is exactly what GTM's History Change trigger listens for by default
+("Fire trigger on: Any History Change") — no special hash-change configuration should be needed.
+Still worth a quick check on the live site once route changes can be tested for real.
+
+## Clean URLs on GitHub Pages: the 404.html trick
+
+This app uses `BrowserRouter`, so routes are real paths (`/cart`, `/checkout`, …), not
+`#/cart`. GitHub Pages is a static file host with no server-side rewrites, so it would normally
+404 on a hard refresh or direct link to one of those paths, since no `cart` file/folder exists —
+only `index.html` does. Two pieces fix this (the standard
+[rafgraph/spa-github-pages](https://github.com/rafgraph/spa-github-pages) technique):
+
+1. **`public/404.html`** — GitHub Pages serves this for any path it can't find. It repacks the
+   real path + query into a query string on the repo root (e.g.
+   `/sup-tag-test-site/cart?tags=all` → `/sup-tag-test-site/?/cart&tags=all`), which GitHub Pages
+   *can* serve, since that's just `index.html` with a query string.
+2. **The redirect-restore `<script>` at the very top of `index.html`'s `<head>`** — runs before
+   anything else (including the tag-switcher script), detects the repacked query string, and
+   calls `history.replaceState` to put the real URL back (`/sup-tag-test-site/cart?tags=all`)
+   before React Router or the tag switcher ever reads `location`.
+
+Practical effect: any full-page navigation to a deep path (a hard refresh, a bookmark, a direct
+link, or the tag switcher's own full-page reload) takes one extra round-trip through
+`404.html` before landing on the right page — a bit slower than a same-page 304, but invisible
+to the visitor and the only way to get real clean URLs out of a router-less static host.
+
+If you ever rename the repo (changing the GitHub Pages path), update `pathSegmentsToKeep` in
+`public/404.html` to match the new number of path segments before the app's own routes, and
+update `vite.config.js`'s `base` to match — `BrowserRouter`'s `basename` reads `base` automatically
+via `import.meta.env.BASE_URL`, so that part doesn't need a separate change.
 
 ## Dependencies, and why each is here
 
 | Package | Why |
 |---|---|
 | `react`, `react-dom` | UI library. Chosen over vanilla JS because the site now has real shared state (cart quantities, event logs) and repeated layout across many pages — component reuse pays off here. Chosen over Angular for lower ceremony/boilerplate for a project this size. |
-| `react-router-dom` | Client-side routing for the SPA. Specifically its `HashRouter`, not `BrowserRouter` — GitHub Pages serves static files with no server-side rewrite rules, so a hard refresh on a deep `BrowserRouter` path (e.g. `/cart`) would 404. Hash-based routes (`/#/cart`) never hit the server on refresh, avoiding that entirely without needing a `404.html` redirect trick. |
+| `react-router-dom` | Client-side routing for the SPA, using `BrowserRouter` for clean URLs (`/cart`, not `/#/cart`). Paired with `public/404.html` + a redirect-restore script in `index.html` (see "Clean URLs on GitHub Pages" below) to work around GitHub Pages having no server-side rewrites. |
 | `vite` | Dev server + build tool. Chosen over Create React App (which Hotjar's own `hotjar/sandbox` repo uses) because CRA is deprecated/unmaintained; Vite is the current standard, has near-instant hot reload, and a much simpler config surface. |
 | `@vitejs/plugin-react` | Vite's official plugin for compiling JSX/Fast Refresh. |
 | *(GitHub Actions, not npm)* `actions/checkout`, `actions/setup-node`, `actions/upload-pages-artifact`, `actions/deploy-pages` | Official GitHub Actions used by `.github/workflows/deploy.yml` to build and publish to Pages on every push — no `gh-pages` npm package or manual deploy branch needed. |

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Home() {
   return (
     <>
@@ -23,7 +25,7 @@ export default function Home() {
 
       <p>
         Navigate between pages to test SPA-driven pageview tracking, or go to{' '}
-        <a href="#/events">Fire Events</a> to trigger custom Heap/Contentsquare events manually.
+        <Link to="/events">Fire Events</Link> to trigger custom Heap/Contentsquare events manually.
       </p>
     </>
   )

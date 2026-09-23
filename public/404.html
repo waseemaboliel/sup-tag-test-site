@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Support Tag Test Site</title>
+<script>
+  // Single Page Apps for GitHub Pages — https://github.com/rafgraph/spa-github-pages
+  // GitHub Pages serves this file for any path it can't find as a real file (e.g. a
+  // deep link or hard refresh on /sup-tag-test-site/cart, since only index.html exists
+  // on disk). It repacks the real path/query into a query string GitHub Pages CAN serve
+  // (the repo root, index.html), then index.html's matching script restores the original
+  // URL via history.replaceState before React Router reads it. See DEVELOPER.md.
+  var pathSegmentsToKeep = 1; // keep "/sup-tag-test-site" — matches vite.config.js's base
+  var l = window.location;
+  l.replace(
+    l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+    l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+    l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+    (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+    l.hash
+  );
+</script>
+</head>
+<body></body>
+</html>

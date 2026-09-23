@@ -15,7 +15,7 @@ https://waseemaboliel.github.io/sup-tag-test-site/.
 
 ## Pages
 
-SPA routes (`src/pages/`, hash-based — e.g. `/#/cart`):
+SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Home** — overview
 - **Page Two** — second route, for testing pageview tracking across a client-side route change
 - **Fire Events** — buttons to fire a Contentsquare dynamic variable, a manual Contentsquare pageview, a Heap custom event, and a raw GTM dataLayer push

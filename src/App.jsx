@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
 import PageTwo from './pages/PageTwo.jsx'
@@ -7,12 +7,14 @@ import Cart from './pages/Cart.jsx'
 import Checkout from './pages/Checkout.jsx'
 import GuestCheckout from './pages/GuestCheckout.jsx'
 
-// HashRouter (not BrowserRouter): GitHub Pages serves static files with no
-// server-side rewrite rules, so a hard refresh on a deep BrowserRouter path
-// like /cart would 404. Hash-based routes avoid that entirely.
+// BrowserRouter (not HashRouter): gives clean URLs like /cart?tags=all instead of
+// /?tags=all#/cart. GitHub Pages has no server-side rewrites, so a hard refresh or direct
+// link to a deep path like /cart would normally 404 — public/404.html + the redirect-restore
+// script at the top of index.html (the standard github.com/rafgraph/spa-github-pages trick)
+// handle that instead. basename comes from Vite's BASE_URL so it always matches vite.config.js.
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -23,6 +25,6 @@ export default function App() {
           <Route path="/guest-checkout" element={<GuestCheckout />} />
         </Routes>
       </Layout>
-    </HashRouter>
+    </BrowserRouter>
   )
 }

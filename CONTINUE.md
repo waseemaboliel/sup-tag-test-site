@@ -5,20 +5,19 @@ Working state and context needed to pick this project back up in a future sessio
 ## Current state
 
 - Phase 0 (site skeleton + GTM setup), Phase 1 (Ecommerce & Transactions), Phase 2 (Error
-  Analysis), and Phase 3 (SPA/npm rebuild) are done. Phases 3's build has been verified locally
-  (`npm run build` + `npm run preview`, clicked through via browser automation) but **not yet
-  verified on the live deployed site** — see "Not yet done" below.
-- Phase 4 (Tag Switcher) app-code side is done; its GTM console side (Data Layer Variable +
-  firing conditions) is not — see "Phase 4" below. Phase 5 (Re-add Hotjar) is next up after that,
-  not started. See `PLAN.md`.
-- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date through Phase 4's
-  app-code changes as of this note.
+  Analysis), Phase 3 (SPA/npm rebuild), and Phase 4 (Tag Switcher)'s app-code side are all done
+  and live-verified on the actual deployed site (not just local preview). Phase 4's GTM console
+  side (Data Layer Variable + firing conditions) is **not** done — see "Phase 4" below. Phase 5
+  (Re-add Hotjar) is next up after that, not started. See `PLAN.md`.
+- Live site: https://waseemaboliel.github.io/sup-tag-test-site/ — up to date through the
+  BrowserRouter/404.html router migration (see below), pushed and live-verified.
 - Repo: https://github.com/waseemaboliel/sup-tag-test-site (public)
-- **The project is no longer plain static HTML.** It's now a Vite + React + React Router SPA,
-  with two pages (`public/errors.html`, `public/api-errors.html`) deliberately kept as real
-  standalone documents outside the SPA. **Read `DEVELOPER.md` before touching this repo again** —
-  it has the full local setup, run, build, and deploy instructions, plus exactly where the
-  Phase 4/5 hooks (tag switcher dataLayer push, switcher UI) go in the code.
+- **The project is no longer plain static HTML.** It's now a Vite + React + React Router
+  (`BrowserRouter`, clean URLs) SPA, with two pages (`public/errors.html`,
+  `public/api-errors.html`) deliberately kept as real standalone documents outside the SPA.
+  **Read `DEVELOPER.md` before touching this repo again** — it has the full local setup, run,
+  build, and deploy instructions, the clean-URLs-on-GitHub-Pages `404.html` mechanism, and
+  exactly where the Phase 5 hooks go in the code.
 
 ## Phase 3 fully shipped (2026-09-23)
 
@@ -33,24 +32,31 @@ Working state and context needed to pick this project back up in a future sessio
 - Live-verified on the actual deployed site (not just local preview) via browser: home page
   renders correctly, GTM snippet fires (`GTM-W925CGJH` present in both the SPA shell and
   `errors.html`), `errors.html`/`api-errors.html` both resolve as real standalone pages.
-- **Still open:** whether the CS Main tag's History Change trigger actually catches the SPA's
-  `HashRouter` navigation hasn't been directly confirmed (would need checking GTM's debug/preview
-  mode while clicking SPA routes on the live site) — flagged in `DEVELOPER.md`'s GTM reference
-  section as the first thing to check if Artificial Pageviews don't show up as expected.
 
 ## Phase 4 — Tag Switcher (2026-09-23)
 
-App-code side is fully done and live-verified locally (see `PLAN.md` Phase 4 for exact detail):
+App-code side is fully done, pushed, and live-verified (see `PLAN.md` Phase 4 for exact detail):
 inline dataLayer-push script (URL `?tags=` → localStorage → default `all`) duplicated
 byte-identically across `index.html`/`public/errors.html`/`public/api-errors.html`; visible
 "All / Contentsquare / Heap / Hotjar" segmented control in the header (React in the SPA, vanilla
 JS on the two standalone pages), backed by the shared `localStorage` key
-`supTagTestSite.activeTags`. Confirmed via browser automation: switching modes updates
-`window.dataLayer`, persists through reload, and carries over between the SPA and the standalone
-pages correctly.
+`supTagTestSite.activeTags`. Confirmed via browser automation, both locally and live: switching
+modes updates `window.dataLayer`, persists through reload, and carries over between the SPA and
+the standalone pages correctly.
 
-**Not yet pushed to the live site as of writing this note** — was about to push + rely on the
-now-working auto-deploy (no more manual Pages-source flip needed, that's permanent now).
+**Router migration, same day:** shipped first with `HashRouter` (`/?tags=all#/cart`). Waseem
+tested the deployed switcher and expected `/cart?tags=all` instead — correct instinct, since a
+query string only parses as real params when it comes *before* a `#fragment`, so it was landing
+uselessly inside the hash. Switched to `BrowserRouter` (clean URLs) + `public/404.html` (the
+standard [rafgraph/spa-github-pages](https://github.com/rafgraph/spa-github-pages) redirect
+trick, since GitHub Pages has no server-side rewrites and would otherwise 404 a direct/refreshed
+`/cart`) + a matching restore script at the top of `index.html`. Also fixed the standalone pages'
+nav (`public/errors.html`/`public/api-errors.html`) from hash links (`./#/cart`) to clean
+relative links (`./cart`), and a leftover `<a href="#/events">` in `Home.jsx` to a proper
+`<Link to="/events">`. Verified via `node` simulation of the full 404→restore round-trip for
+several URLs before pushing (since `vite preview` doesn't reproduce GitHub Pages' 404 behavior),
+then live-verified the real thing on the deployed site. Full explanation in `DEVELOPER.md`'s
+"Clean URLs on GitHub Pages" section — **read that before changing routing or adding pages.**
 
 **GTM console work still needed (not done, not automatable from here):**
 1. Add a Data Layer Variable `Active Tags` (reads the `activeTags` dataLayer key).
