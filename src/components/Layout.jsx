@@ -68,7 +68,7 @@ export default function Layout({ children }) {
       <footer className="footer">
         <p>
           GTM <code>GTM-W925CGJH</code> · CS project <code>3977</code> · Heap App ID{' '}
-          <code>209188840</code> · see <a href="https://github.com/waseemaboliel/sup-tag-test-site/blob/main/DEVELOPER.md">DEVELOPER.md</a>
+          <code>209188840</code>
         </p>
       </footer>
     </div>
