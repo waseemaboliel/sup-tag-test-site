@@ -1,22 +1,43 @@
 import { useEffect, useRef, useState } from 'react'
 import EventLog, { useEventLog } from '../components/EventLog.jsx'
 
-const BATCH_SIZE = 8
-const MAX_PRODUCTS = 40
+const BATCH_SIZE = 12
+const PRODUCT_IMAGES = [
+    'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1490481651871-ab68d407e8e1?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=640&q=80&sat=-20',
+    'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=640&q=80',
+    'https://images.unsplash.com/photo-1496217590455-aa63a8350eea?auto=format&fit=crop&w=640&q=80',
+]
 
-function productImage(index) {
-    const color = ['#dce8ff', '#f2e6c9', '#d9efe6', '#f5d9df'][index % 4]
-    const label = `Product ${index + 1}`
-    return `data:image/svg+xml,${encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220"><rect width="320" height="220" fill="${color}"/><circle cx="160" cy="95" r="54" fill="#ffffff" fill-opacity=".75"/><text x="160" y="175" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#1c2128">${label}</text></svg>`,
-    )}`
+const CATEGORIES = ['Outerwear', 'Knitwear', 'Essentials', 'Accessories']
+const PRODUCT_NAMES = ['Studio Jacket', 'Soft Structure Knit', 'Everyday Trouser', 'Canvas Tote', 'Relaxed Overshirt', 'Ribbed Layer', 'Travel Coat', 'Utility Shirt']
+
+function productFor(index) {
+    return {
+        id: index + 1,
+        image: PRODUCT_IMAGES[index % PRODUCT_IMAGES.length],
+        name: PRODUCT_NAMES[index % PRODUCT_NAMES.length],
+        category: CATEGORIES[index % CATEGORIES.length],
+        price: 48 + ((index * 17) % 9) * 10,
+        rating: (4 + (index % 10) / 10).toFixed(1),
+        reviews: 12 + ((index * 31) % 280),
+        badge: index % 7 === 0 ? 'Best seller' : index % 5 === 0 ? 'New' : '',
+    }
 }
 
 export default function InfiniteScroll() {
     const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
     const [entries, log] = useEventLog('Scroll or load more products to append new content.')
     const sentinelRef = useRef(null)
-    const hasMore = visibleCount < MAX_PRODUCTS
+    const loadingRef = useRef(false)
 
     useEffect(() => {
         const sentinel = sentinelRef.current
@@ -24,14 +45,17 @@ export default function InfiniteScroll() {
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting && visibleCount < MAX_PRODUCTS) {
-                    setVisibleCount((count) => Math.min(count + BATCH_SIZE, MAX_PRODUCTS))
+                if (entry.isIntersecting && !loadingRef.current) {
+                    loadingRef.current = true
+                    observer.unobserve(sentinel)
+                    setVisibleCount((count) => count + BATCH_SIZE)
                     log('Infinite scroll appended a product batch')
                 }
             },
             { rootMargin: '240px' },
         )
         observer.observe(sentinel)
+        loadingRef.current = false
         return () => observer.disconnect()
     }, [log, visibleCount])
 
@@ -45,8 +69,7 @@ export default function InfiniteScroll() {
     }
 
     function loadMore() {
-        if (!hasMore) return
-        setVisibleCount((count) => Math.min(count + BATCH_SIZE, MAX_PRODUCTS))
+        setVisibleCount((count) => count + BATCH_SIZE)
         log('Manual load more appended a product batch')
     }
 
@@ -59,27 +82,34 @@ export default function InfiniteScroll() {
             </p>
             <div className="identity-status" aria-live="polite">
                 <span>Products rendered</span>
-                <strong>{visibleCount} / {MAX_PRODUCTS}</strong>
+                <strong>{visibleCount} loaded</strong>
                 <span>Loading</span>
-                <strong>{hasMore ? 'On scroll' : 'Complete'}</strong>
+                <strong>Always available</strong>
             </div>
             <div className="product-grid">
-                {Array.from({ length: visibleCount }, (_, index) => (
-                    <article className="product-card" key={index}>
-                        <img src={productImage(index)} alt={`Synthetic product ${index + 1}`} loading="lazy" />
+                {Array.from({ length: visibleCount }, (_, index) => {
+                    const product = productFor(index)
+                    return <article className="product-card" key={product.id}>
+                        <div className="product-image-wrap">
+                            <img src={product.image} alt={`${product.name}, ${product.category}`} loading="lazy" />
+                            {product.badge && <span className="product-badge">{product.badge}</span>}
+                            <button type="button" className="quick-view" onClick={() => recordProductClick(index)}>Quick view</button>
+                        </div>
                         <div>
-                            <strong>Product {index + 1}</strong>
-                            <p>{index % 2 === 0 ? 'New arrival' : 'Limited test collection'}</p>
+                            <small>{product.category}</small>
+                            <strong>{product.name}</strong>
+                            <p className="product-rating">★ {product.rating} <span>({product.reviews})</span></p>
+                            <p className="product-price">${product.price}.00</p>
                             <button type="button" onClick={() => recordProductClick(index)}>
-                                Select product
+                                Add to bag
                             </button>
                         </div>
                     </article>
-                ))}
+                })}
             </div>
             <div ref={sentinelRef} className="scroll-sentinel" aria-hidden="true" />
-            {hasMore && <button type="button" onClick={loadMore}>Load more products</button>}
-            {!hasMore && <p className="notice">All synthetic products are rendered. Scroll back through appended content to compare replay behavior.</p>}
+            <button type="button" onClick={loadMore}>Load more products</button>
+            <p className="notice">This feed is intentionally unbounded. Keep scrolling to create a long session with continuously appended content.</p>
             <EventLog entries={entries} />
         </>
     )

@@ -279,9 +279,46 @@ input[aria-label='Hotjar event name'] {
 .product-card img {
   display: block;
   width: 100%;
-  aspect-ratio: 320 / 220;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   background: var(--bg);
+}
+
+.product-image-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: var(--text);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.quick-view {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: auto;
+  margin: 0;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.product-image-wrap:hover .quick-view,
+.product-image-wrap:focus-within .quick-view {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .product-card>div {
@@ -292,6 +329,29 @@ input[aria-label='Hotjar event name'] {
   margin: 4px 0 10px;
   color: var(--text-dim);
   font-size: 13px;
+}
+
+.product-card small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.product-rating {
+  color: #9a6b13;
+  font-size: 12px;
+}
+
+.product-rating span {
+  color: var(--text-dim);
+}
+
+.product-price {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .product-card button {

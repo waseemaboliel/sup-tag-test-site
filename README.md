@@ -25,7 +25,7 @@ SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Fire Events** — buttons to fire a Contentsquare dynamic variable, a manual Contentsquare pageview, a Heap custom event, and a raw GTM dataLayer push
 - **Login & Identity** — simulates login/logout and sends identity calls to Contentsquare, Heap, and Hotjar
 - **Hotjar Lab** — tests documented Hotjar Events, User Attributes, SPA state changes, storage, and suppression
-- **Infinite PLP** — appends synthetic product cards while scrolling to test dynamic content and lazy media
+- **Infinite PLP** — an unbounded, image-heavy product feed with lazy media, appended cards, ratings, badges, and interactions
 - **Canvas & Shadow DOM** — compares canvas pixels, HTML, open/closed shadow roots, and adopted stylesheets
 - **Iframe Lab** — compares tagged, untagged, sandboxed, same-origin, and cross-origin frames
 - **Survey Targeting** — provides stable URL, Event, and User Attribute fixtures for dashboard-configured Hotjar Surveys

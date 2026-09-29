@@ -330,6 +330,9 @@ child, and a cross-origin comparison with explicit first-party context reporting
 The `/survey-targeting` route now provides stable URL/query/fragment fixtures and
 Identify-before-Event controls for dashboard-configured Survey tests. Consent and intentionally
 allowed keystrokes remain deferred until their current documentation is available.
+The `/infinite-scroll` route is now an unbounded, image-heavy PLP with real remote photography,
+lazy loading, product metadata, badges, ratings, quick-view and add-to-bag interactions, and
+continuously appended batches.
 
 ### Proposed implementation order
 
