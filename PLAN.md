@@ -316,10 +316,10 @@ data is accepted by the live site configuration. Use synthetic values only, neve
 attributes or customer PII, verify HTTPS collection and client-side suppression, and remember
 that Hotjar Recordings are not backed up.
 
-**Status:** planned (2026-09-29). No implementation started. Before coding, confirm the current
-Hotjar consent, SPA state-change, user-attribute, masking/suppression, and feedback-targeting
-details from the official docs or an internal Confluence page. Admin access to the Hotjar
-dashboard is also needed for end-to-end verification.
+**Status:** in progress (2026-09-29). The `/hotjar-lab` route now implements the documented
+Events, Identify/User Attributes, manual `stateChange`, storage capability checks, debug-mode
+reload, and suppression fixtures. Consent/opt-out and allowed-keystroke controls remain excluded
+until their exact current APIs are documented. The rendering edge-case surfaces are next.
 
 ### Proposed implementation order
 

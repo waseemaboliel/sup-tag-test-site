@@ -24,6 +24,7 @@ SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Page Two** — second route, for testing pageview tracking across a client-side route change
 - **Fire Events** — buttons to fire a Contentsquare dynamic variable, a manual Contentsquare pageview, a Heap custom event, and a raw GTM dataLayer push
 - **Login & Identity** — simulates login/logout and sends identity calls to Contentsquare, Heap, and Hotjar
+- **Hotjar Lab** — tests documented Hotjar Events, User Attributes, SPA state changes, storage, and suppression
 - **Cart** — dummy cart with quantity inputs, pushes `cartValue`/`cartItemsNb` dvars
 - **Checkout** — fires `ec:transaction:create`/`ec:transaction:send` in normal, anonymous, duplicate-id, and missing-currency variants
 - **Guest Checkout** — simulates a checkout path that never fires the transaction commands
@@ -35,7 +36,7 @@ Standalone pages (`public/`, real full-page documents outside the SPA — see [D
 ## Roadmap
 
 See [PLAN.md](PLAN.md) for the phased plan. Phases 0–6 (SPA rebuild, per-vendor tag switcher,
-Hotjar + Heap rollout, and identity testing) are complete. Phase 7 is planned as a dedicated
+Hotjar + Heap rollout, and identity testing) are complete. Phase 7 is in progress as a dedicated
 Hotjar coverage and behavior lab.
 
 ## Notes

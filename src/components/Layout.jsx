@@ -8,6 +8,7 @@ const spaLinks = [
   { to: '/events', label: 'Fire Events' },
   { to: '/cart', label: 'Cart' },
   { to: '/login', label: 'Login' },
+  { to: '/hotjar-lab', label: 'Hotjar Lab' },
 ]
 
 function TagSwitcher() {

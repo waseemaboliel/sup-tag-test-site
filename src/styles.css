@@ -191,6 +191,39 @@ input[type='number'] {
   border-radius: 6px;
 }
 
+input[aria-label='Hotjar event name'] {
+  width: 100%;
+  max-width: 460px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.storage-grid,
+.suppression-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+}
+
+.suppression-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 20px;
+}
+
+.suppression-grid > div {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.notice {
+  border-left: 4px solid #c58a19;
+  background: #fff8e7;
+  padding: 12px 14px;
+}
+
 button {
   display: block;
   width: 100%;
