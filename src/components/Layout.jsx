@@ -7,6 +7,7 @@ const spaLinks = [
   { to: '/page-two', label: 'Page Two' },
   { to: '/events', label: 'Fire Events' },
   { to: '/cart', label: 'Cart' },
+  { to: '/login', label: 'Login' },
 ]
 
 function TagSwitcher() {

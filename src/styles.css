@@ -150,6 +150,27 @@ code {
   margin-top: 20px;
 }
 
+.identity-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 20px;
+}
+
+.identity-status span {
+  color: var(--text-dim);
+}
+
+.identity-status strong {
+  margin-left: auto;
+  color: var(--accent);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

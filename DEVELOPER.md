@@ -104,7 +104,7 @@ src/
     EventLog.jsx            Reusable "click a button, see what fired" log + useEventLog() hook,
                              used by Events/Cart/Checkout/GuestCheckout.
   pages/
-    Home.jsx, PageTwo.jsx, Events.jsx, Cart.jsx, Checkout.jsx, GuestCheckout.jsx
+    Home.jsx, PageTwo.jsx, Events.jsx, Cart.jsx, Checkout.jsx, GuestCheckout.jsx, Login.jsx
                             One component per SPA route.
 public/
   errors.html, api-errors.html

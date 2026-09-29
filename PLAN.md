@@ -142,7 +142,14 @@ unpause changes that.
 
 **Why:** user-ID mapping and session-continuity issues are common between Heap and Contentsquare when identity commands are missed or mistimed.
 
-**Status:** not started.
+**Status:** app/code done (2026-09-29). Added the `/login` SPA route with fake Log in/Log out
+buttons and an on-page state/log readout. Login queues the Contentsquare
+`loggingStatus=logged` dynamic variable, calls `heap.identify('test-user-123')` plus
+`heap.addUserProperties({plan: 'test'})`, and calls `window.hj('identify', 'test-user-123',
+{plan: 'test'})`. Logout queues `loggingStatus=anonymous` and calls `heap.resetIdentity()`.
+Each action reports whether the vendor API was available, so the page remains useful when a tag
+is disabled in the Phase 4 switcher or blocked by the browser. Remaining verification is to
+deploy and confirm the identity/session behavior in the Contentsquare, Heap, and Hotjar tools.
 
 ## Phase 7 — Advanced Tag / CSP Edge Cases
 
