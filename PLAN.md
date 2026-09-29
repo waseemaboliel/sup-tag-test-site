@@ -166,7 +166,13 @@ deploy and confirm the identity/session behavior in the Contentsquare, Heap, and
 
 **Why:** these are the scenarios that don't reproduce on a simple site and usually require guesswork on real tickets.
 
-**Status:** not started.
+**Status:** in progress (2026-09-29). Added `public/iframe.html` and its child document
+`public/iframe-child.html`. The page compares a normal iframe with a
+`sandbox="allow-scripts"` iframe, loads the GTM container in the child document, and includes
+string, integer, and high-cardinality Contentsquare dynamic-variable checks, plus direct Heap
+and Hotjar event buttons. The child document also attempts one event for each vendor, allowing
+Support to compare vendor behavior in normal and sandboxed frames. The video and direct-install
+experiments remain to be added.
 
 ## Phase 8 — Funnels & Goals
 
