@@ -224,6 +224,44 @@ input[aria-label='Hotjar event name'] {
   padding: 12px 14px;
 }
 
+.privacy-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.privacy-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.privacy-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  color: var(--text);
+}
+
+.privacy-image,
+.privacy-video {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.privacy-svg {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 70px;
+  margin-top: 10px;
+}
+
 button {
   display: block;
   width: 100%;

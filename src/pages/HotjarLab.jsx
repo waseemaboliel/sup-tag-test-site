@@ -173,6 +173,53 @@ export default function HotjarLab() {
           <p>Suppressed text and child number 123456789.</p>
         </div>
       </div>
+      <form className="privacy-form" onSubmit={(event) => event.preventDefault()}>
+        <label>
+          Text input (suppressed by default)
+          <input type="text" placeholder="Synthetic text only" />
+        </label>
+        <label>
+          Number input
+          <input type="number" placeholder="12345" />
+        </label>
+        <label>
+          Date input
+          <input type="date" defaultValue="2026-09-29" />
+        </label>
+        <label>
+          Email-shaped text (synthetic)
+          <input type="text" placeholder="test@example.invalid" />
+        </label>
+        <label>
+          Long numeric text (always suppressed at 9+ digits)
+          <input type="text" defaultValue="123456789" readOnly />
+        </label>
+      </form>
+      <div className="suppression-grid">
+        <div className="data-hj-suppress">
+          <strong>Class-suppressed media</strong>
+          <img
+            className="privacy-image"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='120'%3E%3Crect width='320' height='120' fill='%23dce8ff'/%3E%3Ctext x='160' y='65' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%232f6fed'%3ESuppressed image%3C/text%3E%3C/svg%3E"
+            alt="Synthetic suppressed image"
+          />
+          <video className="privacy-video" controls muted preload="metadata">
+            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div>
+          <strong>SVG comparison</strong>
+          <svg className="privacy-svg" viewBox="0 0 220 70" role="img" aria-label="Inline SVG control">
+            <rect width="220" height="70" fill="#f2e6c9" />
+            <text x="110" y="42" textAnchor="middle" fill="#8a6415">Inline SVG</text>
+          </svg>
+          <img
+            className="privacy-svg"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='70'%3E%3Crect width='220' height='70' fill='%23f2e6c9'/%3E%3Ctext x='110' y='42' text-anchor='middle' fill='%238a6415'%3ESVG as image%3C/text%3E%3C/svg%3E"
+            alt="SVG used as an image"
+          />
+        </div>
+      </div>
       <button type="button" onClick={refreshStorage}>Refresh storage checks</button>
       <button type="button" onClick={openDebugMode}>Reload with Hotjar debug mode</button>
 
