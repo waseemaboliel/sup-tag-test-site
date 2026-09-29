@@ -65,7 +65,10 @@ function CanvasFixture({ onInteract }) {
 
 function ShadowFixture({ mode, onInteract }) {
     const hostRef = useRef(null)
+    const interactionRef = useRef(onInteract)
     const [adopted, setAdopted] = useState(false)
+
+    interactionRef.current = onInteract
 
     useEffect(() => {
         const host = hostRef.current
@@ -79,11 +82,11 @@ function ShadowFixture({ mode, onInteract }) {
         const wrapper = document.createElement('div')
         wrapper.className = 'inner'
         wrapper.innerHTML = '<strong>Shadow-root content</strong><p>Dynamic child inside the component.</p><button type="button">Click inner button</button>'
-        wrapper.querySelector('button').addEventListener('click', onInteract)
+        wrapper.querySelector('button').addEventListener('click', () => interactionRef.current())
         root.appendChild(wrapper)
 
         return () => host.replaceChildren()
-    }, [mode, onInteract])
+    }, [mode])
 
     return (
         <div>
