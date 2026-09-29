@@ -1,7 +1,7 @@
 # Support Tag Test Site
 
-A React SPA (plus two deliberately standalone pages) used by Support to test how Contentsquare /
-Heap / Hotjar tags behave, loaded through a dedicated GTM sandbox container. Live at
+A React SPA plus standalone HTML test documents used by Support to test how Contentsquare,
+Heap, and Hotjar behave, loaded through a dedicated GTM sandbox container. Live at
 https://waseemaboliel.github.io/sup-tag-test-site/.
 
 **Want to run this locally or add a page? See [DEVELOPER.md](DEVELOPER.md).**
@@ -16,6 +16,10 @@ verified API behavior, privacy rules, storage details, and remaining research ga
 - **Heap tag:** Custom HTML tag, App ID `209188840` — permanently approved for our use by Mohammad Al-Badah.
 - **Hotjar tag:** Custom HTML tag, site `2866949`.
 - All three are gated by a per-vendor "Exception" trigger tied to the tag switcher (All / Contentsquare / Heap / Hotjar) in the site header — see [DEVELOPER.md](DEVELOPER.md).
+
+The tag switcher defaults to `All`. Selecting a single vendor reloads the current page with a
+`?tags=` override and persists the choice in `localStorage`. Use the deployed site for real
+vendor/dashboard verification; localhost is for UI and build work.
 
 ## Pages
 
@@ -33,16 +37,18 @@ SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Checkout** — fires `ec:transaction:create`/`ec:transaction:send` in normal, anonymous, duplicate-id, and missing-currency variants
 - **Guest Checkout** — simulates a checkout path that never fires the transaction commands
 
-Standalone pages (`public/`, real full-page documents outside the SPA — see [DEVELOPER.md](DEVELOPER.md) for why):
+Standalone pages (`public/`, real full-page documents outside the SPA):
 - `errors.html` — JS Errors (automatic), Custom Errors (`trackError`, incl. a PII variant), Console Messages
 - `api-errors.html` — API Errors (automatic on any failed request), PII-in-URL variant, and the `networkRequest:maskUrls`/`api-errors:maskUrl` masking commands
+- `iframe-lab-child.html` — first-party child document used by the Iframe Lab; conditionally loads GTM or stays untagged
 
 ## Roadmap
 
-See [PLAN.md](PLAN.md) for the phased plan. Phases 0–6 (SPA rebuild, per-vendor tag switcher,
-Hotjar + Heap rollout, and identity testing) are complete. Phase 7 is in progress as a dedicated
-Hotjar coverage and behavior lab.
+See [PLAN.md](PLAN.md) for the phased plan. Phases 0–6 are complete. Phase 7 is in progress and
+now includes the Hotjar Lab, privacy fixtures, infinite PLP, canvas/Shadow DOM, iframe, and
+Survey-targeting test surfaces. See [HOTJAR-REFERENCE.md](HOTJAR-REFERENCE.md) for Hotjar API
+and privacy research.
 
 ## Notes
 
-GTM-W925CGJH was seeded by copying two tags ("Contentsquare - Main tag (web)" and "Heap Tag") out of an existing container (`GTM-W989V5M`, owned by Mohammad Al-Badah) using GTM's "copy to another container" action, which does not modify the source container. Nothing in `GTM-W989V5M` was changed.
+GTM-W925CGJH was seeded by copying two tags ("Contentsquare - Main tag (web)" and "Heap Tag") out of an existing container (`GTM-W989V5M`, owned by Mohammad Al-Badah) using GTM's "copy to another container" action, which does not modify the source container. Nothing in `GTM-W989V5M` was changed. Do not commit tokens, private dashboard data, or real customer data; all test identities and attributes are synthetic.
