@@ -62,9 +62,6 @@ export default function Layout({ children }) {
         <a href="./api-errors.html">
           API Errors <span className="mpa-tag">MPA</span>
         </a>
-        <a href="./iframe.html">
-          Iframe &amp; DVars <span className="mpa-tag">MPA</span>
-        </a>
       </nav>
 
       <main className="content">{children}</main>

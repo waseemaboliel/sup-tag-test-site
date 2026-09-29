@@ -24,18 +24,15 @@ SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Cart** — dummy cart with quantity inputs, pushes `cartValue`/`cartItemsNb` dvars
 - **Checkout** — fires `ec:transaction:create`/`ec:transaction:send` in normal, anonymous, duplicate-id, and missing-currency variants
 - **Guest Checkout** — simulates a checkout path that never fires the transaction commands
-- **Iframe &amp; DVars** — compares normal and sandboxed iframe loading and sends dynamic-variable test shapes
 
 Standalone pages (`public/`, real full-page documents outside the SPA — see [DEVELOPER.md](DEVELOPER.md) for why):
 - `errors.html` — JS Errors (automatic), Custom Errors (`trackError`, incl. a PII variant), Console Messages
 - `api-errors.html` — API Errors (automatic on any failed request), PII-in-URL variant, and the `networkRequest:maskUrls`/`api-errors:maskUrl` masking commands
-- `iframe.html` — iframe loading variants and Contentsquare dynamic-variable sanity checks
 
 ## Roadmap
 
 See [PLAN.md](PLAN.md) for the phased plan. Phases 0–6 (SPA rebuild, per-vendor tag switcher,
-Hotjar + Heap rollout, and identity testing) are done — next up is the advanced tag and CSP
-edge-case backlog in Phase 7.
+Hotjar + Heap rollout, and identity testing) are complete.
 
 ## Notes
 

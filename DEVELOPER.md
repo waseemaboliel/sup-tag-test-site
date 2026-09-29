@@ -196,7 +196,7 @@ exception trigger + attaching it to the new tag.
 - **Contentsquare tag:** official "Contentsquare - Main tag" template, project `3977`, tag
   `2c5142b15f133`. Live/active.
 - **Heap tag:** Custom HTML tag, App ID `209188840` — permanently approved for our use by
-  Mohammad Al-Badah (see `PLAN.md` Phase 15 for eventually replacing it with Support's own ID).
+  Mohammad Al-Badah.
   Live/active (unpaused in Phase 5).
 - **Hotjar tag:** Custom HTML tag, site `2866949` (Hotjar Support's own internal sandbox site —
   see `PLAN.md` Phase 5 for the research behind that). Live/active, firing trigger is **All
