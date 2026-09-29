@@ -151,3 +151,188 @@ Each action reports whether the vendor API was available, so the page remains us
 is disabled in the Phase 4 switcher or blocked by the browser. Remaining verification is to
 deploy and confirm the identity/session behavior in the Contentsquare, Heap, and Hotjar tools.
 
+## Phase 7 — Hotjar Coverage & Behavior Lab
+
+See [HOTJAR-REFERENCE.md](HOTJAR-REFERENCE.md) for the canonical Hotjar research and test rules.
+
+**Priority: high.** Hotjar is live in the GTM container, but the site currently exercises only
+the basic tag load and one identify call. This phase makes the playground useful for the Hotjar
+questions Support sees in practice and keeps every test selectable through the existing
+`All / Contentsquare / Heap / Hotjar` switcher.
+
+**Goal:** understand and reproduce what the Hotjar tag can collect, what is configured in the
+Hotjar dashboard rather than fired by page code, and how Hotjar behaves on SPA routes, events,
+identified users, consent changes, masked content, forms, and first-party embedded documents.
+
+**Research baseline:** the project has verified the Hotjar site ID `2866949`, the standard
+`static.hotjar.com/c/hotjar-{id}.js?sv={version}` loader, and the browser calls
+`window.hj('event', 'eventName')` and `window.hj('identify', userId, attributes)`. The Identify API
+reference confirms that User Attributes must be enabled for the Hotjar site, supports up to 100
+attributes per site, limits attribute names to 50 characters, and stores the latest values sent
+for each user. User IDs should be stable, unique, non-PII strings and cannot be changed without
+Hotjar treating the value as a new user. A known user ID should be used for identifiable test
+data; when the ID is unknown, `null` is allowed but attributes must not contain PII. Attribute
+values can be booleans, numbers within JavaScript's safe integer range, strings up to 200
+characters, or ISO-8601 dates. Email addresses may only be sent under the `email` attribute key,
+and should not be used as the user ID except as a last resort. Identify should run on page load,
+after every SPA URL change, and whenever an attribute changes; repeated unchanged calls may be
+skipped by Hotjar. The Events API reference confirms that event names are limited to 250 characters and the characters
+`a-z A-Z 0-9 _ - space . : | /`; there is no event-properties payload. Hotjar supports up to
+10,000 unique events per site, but only the first 50 unique events in a session are searchable
+by recording filters. Events must never contain PII, email/IP data, 9+ digit numbers, timestamps,
+URLs/referral codes, product SKUs, or detailed error logs. If Events and Identify are combined,
+Identify must execute first or survey targeting may not match. The tracking code must be loaded
+before calling `hj`; the documented queue fallback is
+`window.hj=window.hj||function(){(hj.q=hj.q||[]).push(arguments);};`. Legacy `trigger` and
+  `tagRecording` calls remain supported but are not equivalent to searchable Events or survey
+  targeting. Hotjar's Tracking Code uses first-party cookies plus local and session storage; it
+  does not properly load its components when cookies are disabled. The main session cookie lasts
+  30 minutes and extends with activity, while the site-level user cookie persists for 365 days.
+  User Attributes are also cached in local storage, and Survey invite/completion/minimized state
+  is stored in dedicated cookies for 365 days. Hotjar cookies use the top-level domain and cannot
+  be restricted to one subdomain.
+
+**Add a Hotjar test area/page with:**
+
+- **Tag lifecycle:** show whether `window.hj` and the Hotjar script are available, record the
+  active vendor mode, and verify that switching to Hotjar-only prevents CS/Heap test calls from
+  being made. Confirm that SPA navigation does not inject the Hotjar script repeatedly. Add a
+  storage diagnostics panel showing Hotjar cookies, local storage, and session storage without
+  exposing full cookie values.
+- **Page and SPA behavior:** navigate across several routes, exercise query-string changes, and
+  re-run Identify after each URL change with the latest complete test-user attributes. Add the
+  documented Hotjar `stateChange` call when manual tracking is selected. Test the default
+  automatic mode (path changes, excluding fragments/query strings), automatic mode including
+  fragments, and manual mode with unique paths. Compare the resulting pages, sessions, paths,
+  and latest User Attribute values in the Hotjar dashboard.
+- **Custom events:** buttons for predictable events such as `hotjar_test_started`,
+  `hotjar_checkout_started`, `hotjar_modal_opened`, `hotjar_test_completed`,
+  `hotjar_error_occurred`, and `hotjar_variant_a_displayed`, plus rapid duplicate events and
+  validation-boundary cases. Include an event-name validator and a visible warning that Events
+  carry only a name, not properties. Add a controlled first-50-unique-events test without
+  generating unbounded names. Organize the controls around support goals: successful/failed
+  checkout outcomes, error investigation, A/B-test variants, and Survey targeting. Include a
+  note that ordinary click analysis should use Hotjar's Clicked Element filter instead of a
+  custom Event. Use valid Events to filter Recordings and Heatmaps, create a Recording Segment,
+  target a Survey, and start session capture in the dashboard.
+- **User identification and attributes:** login/logout controls that call the documented Hotjar
+  Identify API with a stable non-PII test user and safe attributes such as `plan`, `role`, and
+  `testRun`. Include attribute changes during one session, a repeat-unchanged call, a new stable
+  user, and an unknown-user `null` case with only non-PII attributes. Add validation for the
+  50-character attribute-name and 200-character string-value limits, booleans, safe numbers,
+  ISO-8601 dates, and the reserved `email` attribute behavior without using a real email address.
+  Verify the recommended page-view cadence: send the latest complete attribute set on every page
+  view and after SPA URL changes, not only when the login button is clicked. Keep the direct app
+  controls for deterministic tests, and document the optional GTM implementation separately:
+  Data Layer Variables feeding a Custom HTML Identify tag, fired after Hotjar on All Pages and
+  published to Live. Any future GTM Attribute tag must use the existing tag-switcher exception.
+  Add safe segmentation and Survey-targeting examples for `role`, `plan`, `subscription_type`,
+  `language`, `on_trial`, `widgets_opt_out`, purchase-total buckets, and signup dates. Include a
+  deliberate warning against one-attribute-per-SKU or other high-cardinality designs because the
+  site-wide limit is 100 unique attribute names. Keep all PII tests synthetic and demonstrate
+  that identifiable attributes require a stable User ID for later lookup/deletion.
+  The page should show that User Attributes must first be enabled in Hotjar Settings and should
+  never send names, card data, or other real personal data.
+- **Consent and opt-out:** explicit opt-in, opt-out, and re-consent controls using the current
+  documented Hotjar mechanism. Show the current local consent state, explain when a reload is
+  required, and verify the Network panel plus recording behavior after each transition. Do not
+  assume the legacy `hj('consent')` call is still the complete API until the current docs confirm
+  its arguments and behavior. Add a separate verification path for browser Do Not Track and
+  dashboard/IP blocking: confirm that collection is blocked as expected, while documenting the
+  exception that an explicitly submitted Survey response may still be collected under Do Not
+  Track. Do not fake IP blocking in page code.
+- **Cookie and storage edge cases:** test normal storage, cookies disabled, local storage
+  disabled, and session storage disabled where the browser allows it. Confirm that Hotjar does
+  not record when cookies are disabled, that a session continues across route changes, and that
+  a new session/user context appears after the relevant storage is cleared. Add a safe reset
+  control that clears only this site's Hotjar-related storage after warning the tester. Verify
+  that User Attribute caching and Survey completion/minimized state behave as documented.
+- **Recording, heatmap, and form behavior:** a realistic interaction surface with clicks,
+  scrolling, hover/focus states, an accordion, modal, dynamic content, a long page, and a form.
+  Include deliberately suppressed and unsuppressed controls so Support can compare Recordings,
+  Heatmaps, and Survey screenshots. The current suppression guidance says user input is
+  suppressed by default, numbers with 9 or more digits are always suppressed, and data is
+  suppressed before transmission with no retroactive cleanup after collection. Test text,
+  number, date, placeholder, email-like, credit-card-like, and long-phone-number inputs, plus
+  allowed-input behavior only when the dashboard setting permits it. Add text, image, and video
+  elements marked with `data-hj-suppress` and with the `data-hj-suppress` class, including a
+  parent element that suppresses its children. Include an inline SVG control and document that
+  inline SVG cannot be suppressed by this mechanism, while an SVG used as an image source can be.
+  Document the dashboard-side site-wide/page-specific suppression settings and the requirement
+  for Admin access without pretending page code changes those settings.
+- **Feedback and survey targeting:** document the dashboard-side setup needed to target a test
+  survey or feedback widget by URL, event, or user attribute. Cover Simple, Exact, Starts with,
+  Ends with, Contains, and Regex URL matching, including query strings and fragments. Verify that
+  JavaScript Event targeting overrides URL targeting and URL exclusions. Test Popover, Button,
+  Bubble, Embedded, Full Screen, and Link Survey behavior where dashboard access allows; document
+  that Link Survey responses cannot connect to Recordings because they run on a separate domain.
+  Include Survey cookie reset between repeat runs and a small Survey Logic case. The page should
+  provide the exact event/attribute values that the dashboard rule expects, but should not pretend
+  that page code alone creates a survey.
+- **First-party iframe behavior:** add a parent page and a child page hosted by this project,
+  each with a clearly reported Hotjar mode. Compare a normal first-party iframe, a sandboxed
+  iframe, and a child without the tag. Keep third-party video iframes out of the Hotjar claim:
+  the site cannot inject Hotjar into vendor-owned iframe content.
+- **Cross-vendor rendering and DOM edge cases:** add a shared test track for Hotjar, Contentsquare,
+  and Heap so Support can compare what each tag sees from the same page. It should include:
+  - An infinite-scroll PLP-style surface that appends rows, product-like cards, images, text, and
+    controls while the visitor scrolls. Record initial content, appended content, repeated loads,
+    rapid scrolling, and lazy media behavior.
+  - Canvas elements with text-like drawing, shapes, pointer interactions, redraws, resizing, and
+    a control HTML fallback. Compare what each vendor can record or attribute when the content is
+    pixels rather than DOM nodes.
+  - Open and closed Shadow DOM components with buttons, inputs, dynamic updates, and adopted
+    stylesheets. Compare host-versus-inner-element attribution, masking/suppression boundaries,
+    replay rendering, and whether closed roots are observable at all.
+  - Same-origin and cross-origin iframe cases, including a child with each vendor tag, a child
+    without tags, and a sandboxed child. Keep the cross-origin child on a separately served test
+    origin where possible; do not claim that a parent can instrument content it cannot control.
+  - For each case, show a small plain-HTML control beside the special rendering so differences
+    are attributable to the DOM/canvas/shadow/iframe boundary rather than the interaction itself.
+  - Keep all vendor controls behind the existing tag switcher: `All` exercises all three, while
+    `Contentsquare`, `Heap`, or `Hotjar` isolates one vendor.
+- **Debug readout:** display the queued Hotjar calls, current test user, emitted events, consent
+  state, storage capability results, cookie names, and frame context locally. Do not attempt to
+  extract or display the automatically assigned Hotjar User ID; it is browser/cookie-specific
+  and unavailable to JavaScript. Add a `?hjDebug=1`
+  link/control for the documented Hotjar console debugging flow and a short verification
+  checklist for Hotjar recordings, heatmaps, events, user attributes, surveys, storage, and
+  network requests. Never display raw cookie or local-storage values because User Attributes can
+  be present there.
+
+**GTM/design constraints:** keep GTM as the source of Hotjar tag loading; do not add a second
+Hotjar loader to the React app. The Hotjar tag remains an `All Pages` tag and is gated by the
+existing `Exception - Hotjar Disabled` trigger. Page code may call `window.hj` after the tag's
+queue is initialized, but must safely handle the Hotjar-only tag being disabled or blocked. Do
+not attach Hotjar to History Change or other SPA triggers, since multiple Tracking Code loads are
+unsupported and can cause missing or incorrect tracking. Verify exactly one Hotjar script in the
+Network panel. The official `@hotjar/browser` package exists, but is out of scope while GTM is the
+chosen loader.
+
+**Dashboard verification required:** test on the deployed GitHub Pages domain with Hotjar site
+`2866949`, using recordings, heatmaps, Events, User Attributes, and an intentionally configured
+test survey/feedback widget. Localhost is suitable for UI checks but is not proof that Hotjar
+data is accepted by the live site configuration. Use synthetic values only, never send IP
+attributes or customer PII, verify HTTPS collection and client-side suppression, and remember
+that Hotjar Recordings are not backed up.
+
+**Status:** planned (2026-09-29). No implementation started. Before coding, confirm the current
+Hotjar consent, SPA state-change, user-attribute, masking/suppression, and feedback-targeting
+details from the official docs or an internal Confluence page. Admin access to the Hotjar
+dashboard is also needed for end-to-end verification.
+
+### Proposed implementation order
+
+1. **Hotjar Lab foundation:** Events, Identify/User Attributes, manual SPA state changes, debug
+  mode, and safe storage diagnostics.
+2. **Privacy lab:** suppression examples, form inputs, masked media, and dashboard verification.
+3. **Infinite-scroll PLP:** shared realistic page for all three vendors.
+4. **Shadow DOM:** open root first, then closed root and adopted stylesheet comparison.
+5. **Canvas:** drawable content, pointer interactions, redraw/resize, and HTML fallback.
+6. **Iframes:** same-origin child, sandboxed child, no-tag child, then cross-origin child.
+7. **Survey and consent verification:** configure dashboard rules and add only the APIs confirmed
+  by the remaining documentation.
+
+This order gives us a useful Hotjar page early and makes each later rendering boundary a focused
+comparison instead of one large diagnostic page.
+

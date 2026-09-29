@@ -6,6 +6,9 @@ https://waseemaboliel.github.io/sup-tag-test-site/.
 
 **Want to run this locally or add a page? See [DEVELOPER.md](DEVELOPER.md).**
 
+**Hotjar implementation reference:** see [HOTJAR-REFERENCE.md](HOTJAR-REFERENCE.md) for the
+verified API behavior, privacy rules, storage details, and remaining research gaps.
+
 ## Setup
 
 - **GTM container:** `GTM-W925CGJH` (a fresh sandbox container, separate from any customer or shared container)
@@ -32,7 +35,8 @@ Standalone pages (`public/`, real full-page documents outside the SPA — see [D
 ## Roadmap
 
 See [PLAN.md](PLAN.md) for the phased plan. Phases 0–6 (SPA rebuild, per-vendor tag switcher,
-Hotjar + Heap rollout, and identity testing) are complete.
+Hotjar + Heap rollout, and identity testing) are complete. Phase 7 is planned as a dedicated
+Hotjar coverage and behavior lab.
 
 ## Notes
 
