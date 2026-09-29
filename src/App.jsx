@@ -11,6 +11,7 @@ import HotjarLab from './pages/HotjarLab.jsx'
 import InfiniteScroll from './pages/InfiniteScroll.jsx'
 import RenderingLab from './pages/RenderingLab.jsx'
 import IframeLab from './pages/IframeLab.jsx'
+import SurveyTargeting from './pages/SurveyTargeting.jsx'
 
 // BrowserRouter (not HashRouter): gives clean URLs like /cart?tags=all instead of
 // /?tags=all#/cart. GitHub Pages has no server-side rewrites, so a hard refresh or direct
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/infinite-scroll" element={<InfiniteScroll />} />
           <Route path="/rendering-lab" element={<RenderingLab />} />
           <Route path="/iframe-lab" element={<IframeLab />} />
+          <Route path="/survey-targeting" element={<SurveyTargeting />} />
         </Routes>
       </Layout>
     </BrowserRouter>

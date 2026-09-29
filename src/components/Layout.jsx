@@ -12,6 +12,7 @@ const spaLinks = [
   { to: '/infinite-scroll', label: 'Infinite PLP' },
   { to: '/rendering-lab', label: 'Canvas & Shadow DOM' },
   { to: '/iframe-lab', label: 'Iframe Lab' },
+  { to: '/survey-targeting', label: 'Survey Targeting' },
 ]
 
 function TagSwitcher() {

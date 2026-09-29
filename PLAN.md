@@ -327,6 +327,9 @@ The `/rendering-lab` route now implements canvas-versus-HTML and open/closed Sha
 comparisons, including adopted stylesheet detection and cross-vendor interaction signals.
 The `/iframe-lab` route now implements tagged and untagged same-origin children, a sandboxed
 child, and a cross-origin comparison with explicit first-party context reporting.
+The `/survey-targeting` route now provides stable URL/query/fragment fixtures and
+Identify-before-Event controls for dashboard-configured Survey tests. Consent and intentionally
+allowed keystrokes remain deferred until their current documentation is available.
 
 ### Proposed implementation order
 

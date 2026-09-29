@@ -495,6 +495,8 @@ The dedicated Hotjar page should include:
 - `?hjDebug=1` link.
 - Local event, Identify, storage, and consent readout without exposing private values or trying
   to extract the Hotjar User ID.
+- Stable `/survey-targeting` URL/query/fragment fixtures and Identify-before-Event controls for
+  dashboard-configured Survey tests.
 - Dashboard verification checklist for Recordings, Heatmaps, Events, User Attributes, Surveys, and network requests.
 
 ## Cross-Vendor Rendering Edge Cases
