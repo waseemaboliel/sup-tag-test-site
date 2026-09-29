@@ -323,6 +323,9 @@ until their exact current APIs are documented. The `/infinite-scroll` route impl
 surface with appended batches, lazy images, manual loading, and cross-vendor interaction signals.
 The remaining rendering edge-case surfaces are next.
 
+The `/rendering-lab` route now implements canvas-versus-HTML and open/closed Shadow DOM
+comparisons, including adopted stylesheet detection and cross-vendor interaction signals.
+
 ### Proposed implementation order
 
 1. **Hotjar Lab foundation:** Events, Identify/User Attributes, manual SPA state changes, debug

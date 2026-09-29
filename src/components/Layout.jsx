@@ -10,6 +10,7 @@ const spaLinks = [
   { to: '/login', label: 'Login' },
   { to: '/hotjar-lab', label: 'Hotjar Lab' },
   { to: '/infinite-scroll', label: 'Infinite PLP' },
+  { to: '/rendering-lab', label: 'Canvas & Shadow DOM' },
 ]
 
 function TagSwitcher() {

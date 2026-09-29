@@ -304,6 +304,44 @@ input[aria-label='Hotjar event name'] {
   height: 1px;
 }
 
+.rendering-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.fixture-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.test-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: crosshair;
+}
+
+.shadow-host {
+  min-height: 100px;
+  margin-top: 12px;
+}
+
+.fixture-panel small {
+  color: var(--text-dim);
+}
+
+.html-comparison {
+  min-height: 76px;
+  color: var(--text-dim);
+}
+
 button {
   display: block;
   width: 100%;

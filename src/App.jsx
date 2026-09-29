@@ -9,6 +9,7 @@ import GuestCheckout from './pages/GuestCheckout.jsx'
 import Login from './pages/Login.jsx'
 import HotjarLab from './pages/HotjarLab.jsx'
 import InfiniteScroll from './pages/InfiniteScroll.jsx'
+import RenderingLab from './pages/RenderingLab.jsx'
 
 // BrowserRouter (not HashRouter): gives clean URLs like /cart?tags=all instead of
 // /?tags=all#/cart. GitHub Pages has no server-side rewrites, so a hard refresh or direct
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/hotjar-lab" element={<HotjarLab />} />
           <Route path="/infinite-scroll" element={<InfiniteScroll />} />
+          <Route path="/rendering-lab" element={<RenderingLab />} />
         </Routes>
       </Layout>
     </BrowserRouter>
