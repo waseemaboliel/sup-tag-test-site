@@ -9,6 +9,7 @@ const spaLinks = [
   { to: '/cart', label: 'Cart' },
   { to: '/login', label: 'Login' },
   { to: '/hotjar-lab', label: 'Hotjar Lab' },
+  { to: '/infinite-scroll', label: 'Infinite PLP' },
 ]
 
 function TagSwitcher() {

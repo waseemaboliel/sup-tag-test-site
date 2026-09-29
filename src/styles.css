@@ -262,6 +262,48 @@ input[aria-label='Hotjar event name'] {
   margin-top: 10px;
 }
 
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.product-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.product-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 320 / 220;
+  object-fit: cover;
+  background: var(--bg);
+}
+
+.product-card > div {
+  padding: 12px 14px;
+}
+
+.product-card p {
+  margin: 4px 0 10px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.product-card button {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.scroll-sentinel {
+  height: 1px;
+}
+
 button {
   display: block;
   width: 100%;

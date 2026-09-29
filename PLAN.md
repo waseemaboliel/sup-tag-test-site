@@ -319,7 +319,9 @@ that Hotjar Recordings are not backed up.
 **Status:** in progress (2026-09-29). The `/hotjar-lab` route now implements the documented
 Events, Identify/User Attributes, manual `stateChange`, storage capability checks, debug-mode
 reload, and suppression fixtures. Consent/opt-out and allowed-keystroke controls remain excluded
-until their exact current APIs are documented. The rendering edge-case surfaces are next.
+until their exact current APIs are documented. The `/infinite-scroll` route implements the PLP
+surface with appended batches, lazy images, manual loading, and cross-vendor interaction signals.
+The remaining rendering edge-case surfaces are next.
 
 ### Proposed implementation order
 
