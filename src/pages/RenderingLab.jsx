@@ -2,11 +2,35 @@ import { useEffect, useRef, useState } from 'react'
 import EventLog, { useEventLog } from '../components/EventLog.jsx'
 
 function sendVendorSignals(log, label) {
-    if (typeof window.hj === 'function') window.hj('event', 'rendering_lab_interaction')
-    if (window.heap) window.heap.track('Rendering Lab Interaction', { surface: label })
-    window._uxa = window._uxa || []
-    window._uxa.push(['trackDynamicVariable', { key: 'renderingSurface', value: label }])
-    log(`${label} interaction sent to available vendor queues`)
+    const results = []
+    try {
+        if (typeof window.hj === 'function') {
+            window.hj('event', 'rendering_lab_interaction')
+            results.push('Hotjar sent')
+        } else {
+            results.push('Hotjar unavailable')
+        }
+    } catch (error) {
+        results.push('Hotjar error')
+    }
+    try {
+        if (window.heap && typeof window.heap.track === 'function') {
+            window.heap.track('Rendering Lab Interaction', { surface: label })
+            results.push('Heap sent')
+        } else {
+            results.push('Heap unavailable')
+        }
+    } catch (error) {
+        results.push('Heap error')
+    }
+    try {
+        window._uxa = window._uxa || []
+        window._uxa.push(['trackDynamicVariable', { key: 'renderingSurface', value: label }])
+        results.push('Contentsquare queued')
+    } catch (error) {
+        results.push('Contentsquare error')
+    }
+    log(`${label}: ${results.join(', ')}`)
 }
 
 function CanvasFixture({ onInteract }) {
