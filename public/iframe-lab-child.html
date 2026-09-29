@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iframe Lab Child - Support Tag Test Site</title>
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('notags') === '1') return;
+  var key = 'supTagTestSite.activeTags';
+  var valid = ['all', 'cs', 'heap', 'hotjar'];
+  var mode = params.get('tags');
+  if (valid.indexOf(mode) === -1) {
+    try { mode = localStorage.getItem(key); } catch (e) {}
+  }
+  if (valid.indexOf(mode) === -1) mode = 'all';
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ activeTags: mode === 'all' ? ['cs', 'heap', 'hotjar'] : [mode] });
+  window.iframeLabTagMode = mode;
+})();
+</script>
+<script>(function(w,d,s,l,i){
+  if (!w.iframeLabTagMode) return;
+  w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+  var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+  j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W925CGJH');</script>
+<style>
+  body { margin: 0; padding: 14px; font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1c2128; }
+  strong { color: #2f6fed; }
+  button { padding: 8px 12px; }
+</style>
+</head>
+<body>
+<strong>First-party iframe child</strong>
+<p>Tag mode: <code id="mode"></code></p>
+<p>Origin: <code id="origin"></code></p>
+<button type="button" id="childButton">Child interaction</button>
+<script>
+document.getElementById('mode').textContent = window.iframeLabTagMode || 'no GTM';
+document.getElementById('origin').textContent = window.location.origin;
+document.getElementById('childButton').addEventListener('click', function () {
+  if (typeof window.hj === 'function') window.hj('event', 'iframe_child_interaction');
+  if (window.heap) window.heap.track('Iframe Child Interaction', { context: 'first-party-child' });
+  window._uxa = window._uxa || [];
+  window._uxa.push(['trackDynamicVariable', { key: 'iframeContext', value: 'first-party-child' }]);
+});
+</script>
+</body>
+</html>

@@ -27,6 +27,7 @@ SPA routes (`src/pages/`, clean paths — e.g. `/cart`):
 - **Hotjar Lab** — tests documented Hotjar Events, User Attributes, SPA state changes, storage, and suppression
 - **Infinite PLP** — appends synthetic product cards while scrolling to test dynamic content and lazy media
 - **Canvas & Shadow DOM** — compares canvas pixels, HTML, open/closed shadow roots, and adopted stylesheets
+- **Iframe Lab** — compares tagged, untagged, sandboxed, same-origin, and cross-origin frames
 - **Cart** — dummy cart with quantity inputs, pushes `cartValue`/`cartItemsNb` dvars
 - **Checkout** — fires `ec:transaction:create`/`ec:transaction:send` in normal, anonymous, duplicate-id, and missing-currency variants
 - **Guest Checkout** — simulates a checkout path that never fires the transaction commands

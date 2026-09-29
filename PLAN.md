@@ -325,6 +325,8 @@ The remaining rendering edge-case surfaces are next.
 
 The `/rendering-lab` route now implements canvas-versus-HTML and open/closed Shadow DOM
 comparisons, including adopted stylesheet detection and cross-vendor interaction signals.
+The `/iframe-lab` route now implements tagged and untagged same-origin children, a sandboxed
+child, and a cross-origin comparison with explicit first-party context reporting.
 
 ### Proposed implementation order
 

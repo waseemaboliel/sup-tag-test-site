@@ -342,6 +342,22 @@ input[aria-label='Hotjar event name'] {
   color: var(--text-dim);
 }
 
+.iframe-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.test-iframe {
+  display: block;
+  width: 100%;
+  min-height: 150px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
 button {
   display: block;
   width: 100%;
