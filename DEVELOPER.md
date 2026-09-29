@@ -92,7 +92,7 @@ the repo's **Actions** tab (it's set up with `workflow_dispatch`).
 
 ```
 index.html              Vite's SPA entry point — GTM snippet + <div id="root"> + app bootstrap.
-                         Has a TODO comment marking where Phase 4's tag-switcher dataLayer push goes.
+                         Includes the tag-switcher dataLayer bootstrap before GTM loads.
 vite.config.js           Vite config — base path MUST match the GH Pages repo path.
 src/
   main.jsx                React root bootstrap.
@@ -100,7 +100,7 @@ src/
   styles.css              Shared design system for the SPA (CSS variables, layout, components).
   components/
     Layout.jsx             Shared header/nav/footer wrapper around every SPA route.
-                            Has a TODO comment marking where Phase 4's switcher UI goes.
+                            Includes the shared tag-switcher UI for SPA routes.
     EventLog.jsx            Reusable "click a button, see what fired" log + useEventLog() hook,
                              used by Events/Cart/Checkout/GuestCheckout.
   pages/

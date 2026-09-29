@@ -104,7 +104,7 @@ the tag firing correctly is already confirmed, this only checks the data lands o
 - Published version is live (not just a draft).
 - Tags currently in it, all active and each gated by the switcher's per-vendor Exception trigger:
   - **Contentsquare - Main tag (web)** — official template, project `3977`, tag ID `2c5142b15f133`.
-  - **Heap Tag** — Custom HTML, App ID `209188840` (Mohammad Al-Badah's, permanently approved — see `PLAN.md` intro and Phase 15 for eventually replacing it with Support's own ID). Unpaused as of Phase 5.
+  - **Heap Tag** — Custom HTML, App ID `209188840` (Mohammad Al-Badah's, permanently approved). Unpaused as of Phase 5.
   - **Hotjar Tag** — Custom HTML, site `2866949` (Hotjar Support's own internal sandbox site, see `PLAN.md` Phase 5 research).
 - This container was originally seeded by copying two tags out of `GTM-W989V5M` (Mohammad Al-Badah's own container) using GTM's "copy to another container" action, which does not modify the source. Nothing in `GTM-W989V5M` was ever changed — don't touch it.
 - To change anything in GTM-W925CGJH: go to tagmanager.google.com, open the container, edit, then **Submit/Publish a new version** (draft changes alone don't go live). Sign in under the "Waseem Sandbox" Google account — the Contentsquare work account has no access to this container.
